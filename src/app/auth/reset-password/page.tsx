@@ -2,43 +2,53 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Shield } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
 
-export default function Login() {
-  const { user } = useAuth()
+export default function ResetPassword() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (user) {
-      router.push('/')
+    // Check if we have a session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/auth/login')
+      }
     }
-  }, [user, router])
+    checkSession()
+  }, [router])
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (password !== confirmPassword) {
+      setError("Passwords don't match")
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
-      
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password
       })
 
-      if (error) throw error
+      if (updateError) throw updateError
 
-      router.push('/')
-    } catch (error:any) {
-      setError(error.message)
+      router.push('/auth/login?reset=success')
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('Failed to reset password')
+      }
     } finally {
       setLoading(false)
     }
@@ -54,8 +64,10 @@ export default function Login() {
               QuestLife
             </span>
           </div>
-          <h2 className="text-3xl font-bold text-violet-100 mb-2">Welcome back</h2>
-          <p className="text-violet-300/80">Sign in to continue your journey</p>
+          <h2 className="text-3xl font-bold text-violet-100 mb-2">Create New Password</h2>
+          <p className="text-violet-300/80">
+            Enter your new password
+          </p>
         </div>
 
         <div className="bg-[#0E0529]/50 p-8 rounded-lg border border-violet-500/20 backdrop-blur-sm">
@@ -65,25 +77,10 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-violet-200 mb-2">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-violet-950/50 border-violet-500/30 text-violet-100"
-                placeholder="Enter your email"
-              />
-            </div>
-
+          <form onSubmit={handleResetPassword} className="space-y-6">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-violet-200 mb-2">
-                Password
+                New Password
               </label>
               <Input
                 id="password"
@@ -92,7 +89,22 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="bg-violet-950/50 border-violet-500/30 text-violet-100"
-                placeholder="Enter your password"
+                placeholder="Enter new password"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-violet-200 mb-2">
+                Confirm New Password
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="bg-violet-950/50 border-violet-500/30 text-violet-100"
+                placeholder="Confirm new password"
               />
             </div>
 
@@ -101,30 +113,9 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-violet-600 hover:bg-violet-500 text-white"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Resetting Password...' : 'Reset Password'}
             </Button>
-
-            <div className="flex justify-center mt-4">
-              <Link
-                href="/auth/forgot-password"
-                className="text-sm text-violet-400 hover:text-violet-300"
-              >
-                Forgot your password?
-              </Link>
-            </div>
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-violet-300/80">
-              Don't have an account?{' '}
-              <Link 
-                href="/auth/signup" 
-                className="text-violet-400 hover:text-violet-300 font-medium"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>
