@@ -171,7 +171,7 @@ export default function Sidebar() {
           <NavItem href="/pomodoro" icon={Clock} label="Pomodoro" isActive={isActive("/pomodoro")} expanded={expanded} />
           <NavItem href="/diary" icon={BookOpen} label="Diary" isActive={isActive("/diary")} expanded={expanded} />
           <NavItem href="/checklist" icon={CheckSquare} label="Checklist" isActive={isActive("/checklist")} expanded={expanded} />
-          <NavItem href="/verification" icon={Shield} label="Task Verification" isActive={isActive("/verification")} expanded={expanded} />
+          <NavItem href="/tasks" icon={Shield} label="Task Verification" isActive={isActive("/tasks")} expanded={expanded} />
         </NavGroup>
 
         <NavGroup title="Gamification" expanded={expanded}>

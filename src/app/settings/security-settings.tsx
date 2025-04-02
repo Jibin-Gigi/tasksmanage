@@ -56,10 +56,11 @@ export default function SecuritySettings() {
   return (
     <SettingsLayout title="Security" description="Manage your account security settings">
       <div className="space-y-8">
+        {/* Change Password Section */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-medium">Change Password</h3>
+            <Shield className="h-5 w-5 text-violet-400" />
+            <h3 className="text-lg font-medium text-violet-100">Change Password</h3>
           </div>
 
           <div className="space-y-4">
@@ -85,6 +86,7 @@ export default function SecuritySettings() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter your new password"
+                  className="bg-violet-900/20 border-violet-500/20 text-violet-100 placeholder:text-violet-400/50"
                 />
                 <Button
                   variant="ghost"
@@ -160,29 +162,37 @@ export default function SecuritySettings() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        {/* Two-Factor Section */}
+        <div className="flex items-center justify-between p-4 rounded-lg bg-violet-900/20 border border-violet-500/20">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <Label htmlFor="two-factor">Two-Factor Authentication</Label>
+              <ShieldCheck className="h-5 w-5 text-violet-400" />
+              <Label htmlFor="two-factor" className="text-violet-100">Two-Factor Authentication</Label>
             </div>
-            <p className="text-sm text-muted-foreground">Add an extra layer of security to your account</p>
+            <p className="text-sm text-violet-300/80">Add an extra layer of security to your account</p>
           </div>
           <Switch id="two-factor" checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
         </div>
 
+        {/* Alert styling */}
         {twoFactorEnabled && (
-          <Alert>
-            <ShieldAlert className="h-4 w-4" />
-            <AlertTitle>Two-Factor Authentication is enabled</AlertTitle>
-            <AlertDescription>
+          <Alert className="bg-violet-900/20 border-violet-500/20">
+            <ShieldAlert className="h-4 w-4 text-violet-400" />
+            <AlertTitle className="text-violet-100">Two-Factor Authentication is enabled</AlertTitle>
+            <AlertDescription className="text-violet-300/80">
               You'll be asked for an authentication code when signing in on new devices.
             </AlertDescription>
           </Alert>
         )}
 
+        {/* Update button */}
         <div className="flex justify-end">
-          <Button disabled={!canSubmit}>Update Password</Button>
+          <Button 
+            disabled={!canSubmit}
+            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-500 transform hover:scale-105 shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_25px_rgba(124,58,237,0.7)]"
+          >
+            Update Password
+          </Button>
         </div>
       </div>
     </SettingsLayout>

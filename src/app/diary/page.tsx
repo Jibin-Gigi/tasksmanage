@@ -1,216 +1,258 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { BookOpen, Plus, Calendar, Tag, Save, PenTool } from 'lucide-react'
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import Sidebar from '@/components/Sidebar'
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { Book, Plus, Pencil, Trash2, Save } from "lucide-react"
+import Sidebar from "@/components/Sidebar"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useRouter } from "next/navigation"
 
 interface DiaryEntry {
   id: string
   title: string
   content: string
-  date: string
-  tags: string[]
+  mood: string | null
+  created_at: string
+  updated_at: string
+}
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 }
 
 export default function DiaryPage() {
-  const [currentEntry, setCurrentEntry] = useState<DiaryEntry>({
-    id: '',
-    title: '',
-    content: '',
-    date: new Date().toISOString().split('T')[0],
-    tags: []
-  })
-  const [newTag, setNewTag] = useState('')
+  const [entries, setEntries] = useState<DiaryEntry[]>([])
+  const [newEntry, setNewEntry] = useState({ title: "", content: "", mood: "" })
+  const [isCreating, setIsCreating] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const supabase = createClientComponentClient()
+  const router = useRouter()
 
-  const handleSave = () => {
-    if (!currentEntry.title || !currentEntry.content) return
+  useEffect(() => {
+    checkAuth()
+    fetchEntries()
+  }, [])
 
-    const entry: DiaryEntry = {
-      ...currentEntry,
-      id: currentEntry.id || Date.now().toString(),
-      date: new Date().toISOString().split('T')[0]
-    }
-
-    // Here you would typically save to your database
-    console.log('Saving entry:', entry)
-
-    // Reset the form
-    setCurrentEntry({
-      id: '',
-      title: '',
-      content: '',
-      date: new Date().toISOString().split('T')[0],
-      tags: []
-    })
-  }
-
-  const addTag = () => {
-    if (newTag && !currentEntry.tags.includes(newTag)) {
-      setCurrentEntry(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag]
-      }))
-      setNewTag('')
+  const checkAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push("/diary/login")
+      }
+    } catch (err) {
+      console.error("Auth error:", err)
+      router.push("/diary/login")
     }
   }
 
-  const removeTag = (tag: string) => {
-    setCurrentEntry(prev => ({
-      ...prev,
-      tags: prev.tags.filter(t => t !== tag)
-    }))
+  const fetchEntries = async () => {
+    try {
+      setIsLoading(true)
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      setEntries(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch entries')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('diary_entries')
+        .insert([
+          {
+            user_id: user.id,
+            title: newEntry.title,
+            content: newEntry.content,
+            mood: newEntry.mood || null
+          }
+        ])
+        .select()
+
+      if (error) throw error
+
+      setNewEntry({ title: "", content: "", mood: "" })
+      setIsCreating(false)
+      fetchEntries()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create entry')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this entry?')) return
+
+    try {
+      const { error } = await supabase
+        .from('diary_entries')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      setEntries(entries.filter(entry => entry.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete entry')
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center bg-[#030014]">
+          <div className="text-violet-50">Loading...</div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1">
-        <div className="min-h-screen bg-[#030014] text-white p-8 md:pl-20">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 gap-4">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-violet-100 flex items-center gap-3">
-                  <div className="p-2 md:p-3 rounded-xl bg-violet-500/20">
-                    <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-violet-400" />
-                  </div>
-                  Personal Diary
-                </h1>
-                <p className="text-violet-300/80 mt-2 text-base md:text-lg">Record your thoughts and experiences</p>
-              </div>
-              <Button
-                onClick={() => {
-                  setCurrentEntry({
-                    id: '',
-                    title: '',
-                    content: '',
-                    date: new Date().toISOString().split('T')[0],
-                    tags: []
-                  })
-                }}
-                className="bg-violet-600 hover:bg-violet-500 text-white px-4 md:px-6 w-full md:w-auto"
+      <div className="flex-1 flex flex-col min-h-screen bg-[#030014] overflow-x-hidden">
+        <div className="p-4 sm:p-6 md:p-8 md:pl-20">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-6 sm:mb-8 md:mb-12"
+          >
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-violet-50">
+                My Diary
+              </h1>
+              <button
+                onClick={() => setIsCreating(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 text-violet-50 hover:bg-violet-700 transition-colors"
               >
-                <Plus className="h-5 w-5 mr-2" />
+                <Plus className="h-4 w-4" />
                 New Entry
-              </Button>
+              </button>
             </div>
-
-            {/* Editor */}
-            <Card className="p-4 md:p-8 bg-[#0E0529]/50 border-violet-500/20">
-              <div className="space-y-4 md:space-y-6">
-                <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-6">
-                  <div className="w-full md:flex-1">
-                    <label className="block text-sm font-medium text-violet-200 mb-2">
-                      Entry Title
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Give your entry a title..."
-                      value={currentEntry.title}
-                      onChange={(e) => setCurrentEntry(prev => ({ ...prev, title: e.target.value }))}
-                      className="w-full bg-violet-950/50 border-violet-500/30 rounded-lg px-4 py-2.5 text-sm focus:border-violet-500/50 text-violet-100 placeholder-violet-500/50"
-                    />
-                  </div>
-                  <div className="flex flex-row md:flex-col gap-2 md:gap-0 w-full md:w-auto">
-                    <div className="flex-1 md:flex-initial">
-                      <label className="block text-sm font-medium text-violet-200 mb-2">
-                        Date
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={currentEntry.date}
-                          onChange={(e) => setCurrentEntry(prev => ({ ...prev, date: e.target.value }))}
-                          className="w-full md:w-[200px] bg-violet-950/50 border-violet-500/30 rounded-lg px-4 py-2.5 text-sm focus:border-violet-500/50 text-violet-100"
-                        />
-                        <Calendar className="absolute right-3 top-[10px] h-4 w-4 text-violet-400 pointer-events-none" />
-                      </div>
-                    </div>
-                    <div className="flex-1 md:flex-initial">
-                      <label className="block text-sm font-medium text-violet-200 mb-2">
-                        &nbsp;
-                      </label>
-                      <Button
-                        onClick={handleSave}
-                        className="bg-violet-600 hover:bg-violet-500 text-white px-4 md:px-6 w-full"
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Entry
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col md:flex-row items-start gap-4">
-                  <div className="flex-1 relative w-full">
-                    <label className="block text-sm font-medium text-violet-200 mb-2">
-                      Tags
-                    </label>
-                    <div className="relative">
-                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-violet-400 pointer-events-none" />
-                      <input
-                        type="text"
-                        placeholder="Add a tag..."
-                        value={newTag}
-                        onChange={(e) => setNewTag(e.target.value)}
-                        className="w-full bg-violet-950/50 border-violet-500/30 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:border-violet-500/50 text-violet-100 placeholder-violet-500/50"
-                      />
-                    </div>
-                  </div>
-                  <div className="w-full md:w-auto">
-                    <label className="block text-sm font-medium text-violet-200 mb-2">
-                      &nbsp;
-                    </label>
-                    <Button
-                      onClick={addTag}
-                      variant="outline"
-                      className="border-violet-500/50 text-violet-300 px-4 md:px-6 w-full"
-                    >
-                      <Tag className="h-4 w-4 mr-2" />
-                      Add Tag
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {currentEntry.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1.5 bg-violet-500/20 text-violet-200 rounded-full text-sm flex items-center gap-2 hover:bg-violet-500/30 transition-colors"
-                    >
-                      {tag}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="hover:text-violet-400 transition-colors"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-
-                <div className="relative">
-                  <label className="block text-sm font-medium text-violet-200 mb-2">
-                    Content
-                  </label>
-                  <div className="relative">
-                    <Textarea
-                      placeholder="Write your thoughts here..."
-                      value={currentEntry.content}
-                      onChange={(e) => setCurrentEntry(prev => ({ ...prev, content: e.target.value }))}
-                      className="min-h-[300px] md:min-h-[500px] bg-violet-950/50 border-violet-500/30 focus:border-violet-500/50 text-violet-100 placeholder-violet-500/50 rounded-lg pl-6 pr-12 py-6 text-sm leading-relaxed"
-                    />
-                    <PenTool className="absolute top-8 right-4 h-5 w-5 text-violet-500/50 pointer-events-none" />
-                  </div>
-                </div>
+            {error && (
+              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500">
+                {error}
               </div>
-            </Card>
-          </div>
+            )}
+          </motion.div>
+        </div>
+
+        <div className="flex-1 flex flex-col px-4 sm:px-6 md:px-8 md:pl-20 pb-4 sm:pb-6 md:pb-8">
+          {isCreating && (
+            <motion.form
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 rounded-lg border border-violet-500/20 bg-violet-950/50 backdrop-blur-sm p-6"
+              onSubmit={handleSubmit}
+            >
+              <input
+                type="text"
+                placeholder="Title"
+                value={newEntry.title}
+                onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
+                className="w-full bg-violet-900/50 border border-violet-500/20 rounded-lg px-4 py-2 text-violet-50 mb-4"
+                required
+              />
+              <textarea
+                placeholder="Write your thoughts..."
+                value={newEntry.content}
+                onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
+                className="w-full bg-violet-900/50 border border-violet-500/20 rounded-lg px-4 py-2 text-violet-50 mb-4 h-32 resize-y"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Mood (optional)"
+                value={newEntry.mood}
+                onChange={(e) => setNewEntry({ ...newEntry, mood: e.target.value })}
+                className="w-full bg-violet-900/50 border border-violet-500/20 rounded-lg px-4 py-2 text-violet-50 mb-4"
+              />
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsCreating(false)}
+                  className="px-4 py-2 rounded-lg border border-violet-500/20 text-violet-50 hover:bg-violet-900/50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 text-violet-50 hover:bg-violet-700"
+                >
+                  <Save className="h-4 w-4" />
+                  Save Entry
+                </button>
+              </div>
+            </motion.form>
+          )}
+
+          <motion.div
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="grid gap-6"
+          >
+            {entries.length === 0 ? (
+              <div className="text-center text-violet-200/90 py-12">
+                No diary entries yet. Start writing your thoughts!
+              </div>
+            ) : (
+              entries.map((entry) => (
+                <motion.div
+                  key={entry.id}
+                  variants={item}
+                  className="rounded-lg border border-violet-500/20 bg-violet-950/50 backdrop-blur-sm p-6"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-violet-50">{entry.title}</h3>
+                      <p className="text-sm text-violet-200/90">
+                        {new Date(entry.created_at).toLocaleDateString()} at{" "}
+                        {new Date(entry.created_at).toLocaleTimeString()}
+                        {entry.mood && ` • Mood: ${entry.mood}`}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleDelete(entry.id)}
+                        className="p-2 rounded-lg hover:bg-violet-900/50"
+                      >
+                        <Trash2 className="h-4 w-4 text-violet-400" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-violet-200/90 whitespace-pre-wrap">{entry.content}</p>
+                </motion.div>
+              ))
+            )}
+          </motion.div>
         </div>
       </div>
     </div>
   )
-} 
+}
