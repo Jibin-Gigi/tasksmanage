@@ -1,12 +1,18 @@
-import SettingsLayout from "./settings-layout"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import SettingsLayout from "./settings-layout";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AppearanceSettings() {
   return (
-    <SettingsLayout 
-      title="Appearance" 
+    <SettingsLayout
+      title="Appearance"
       description="Customize how your TaskQuest looks and feels"
     >
       <div className="space-y-8">
@@ -23,9 +29,9 @@ export default function AppearanceSettings() {
                 <SelectValue placeholder="Select theme" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="dark">Dark Blue</SelectItem>
+                <SelectItem value="retro">Retro Green</SelectItem>
+                {/* <SelectItem value="system">System</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
@@ -62,5 +68,5 @@ export default function AppearanceSettings() {
         </div>
       </div>
     </SettingsLayout>
-  )
+  );
 }
