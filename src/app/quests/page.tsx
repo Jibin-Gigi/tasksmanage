@@ -1,172 +1,203 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Crown, Plus, Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import Sidebar from '@/components/Sidebar'
-import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
+import { useState, useEffect } from "react";
+import { Crown, Plus, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import Sidebar from "@/components/Sidebar";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Task {
-  id: string
-  description: string
-  completed: boolean
-  selected?: boolean
+  id: string;
+  description: string;
+  completed: boolean;
+  selected?: boolean;
 }
 
 interface Quest {
-  id: string
-  title: string
-  description: string
-  tasks: Task[]
-  difficulty: 'Easy' | 'Medium' | 'Hard'
-  xp: number
+  id: string;
+  title: string;
+  description: string;
+  tasks: Task[];
+  difficulty: "Easy" | "Medium" | "Hard";
+  xp: number;
 }
 
 export default function QuestsPage() {
-  const { user, loading } = useAuth()
-  const [goal, setGoal] = useState('')
-  const [loadingQuest, setLoadingQuest] = useState(false)
-  const [quests, setQuests] = useState<Quest[]>([])
-  const [showForm, setShowForm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [selectedTasks, setSelectedTasks] = useState<{ [key: string]: boolean }>({})
-  const [generatedQuest, setGeneratedQuest] = useState<Quest | null>(null)
+  const { user, loading } = useAuth();
+  const [goal, setGoal] = useState("");
+  const [loadingQuest, setLoadingQuest] = useState(false);
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTasks, setSelectedTasks] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [generatedQuest, setGeneratedQuest] = useState<Quest | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/login'
-      return
+      window.location.href = "/login";
+      return;
     }
 
     const loadUserQuests = async () => {
       try {
-        if (!user) return
+        if (!user) return;
 
         const { data, error } = await supabase
-          .from('quests')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
+          .from("quests")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .eq("completed", false);
 
-        if (error) throw error
+        if (error) throw error;
 
-        setQuests(data.map(quest => ({
-          ...quest,
-          tasks: quest.selected_tasks
-        })))
+        setQuests(
+          data.map((quest) => ({
+            ...quest,
+            tasks: quest.selected_tasks,
+          }))
+        );
       } catch (error) {
-        console.error('Error loading quests:', error)
+        console.error("Error loading quests:", error);
       }
-    }
+    };
 
-    loadUserQuests()
-  }, [user, loading])
+    loadUserQuests();
+  }, [user, loading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoadingQuest(true)
-    setError(null)
+    e.preventDefault();
+    setLoadingQuest(true);
+    setError(null);
 
     try {
-      const response = await fetch('/api/generate-quest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal })
-      })
+      const response = await fetch("/api/generate-quest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal }),
+      });
 
-      if (!response.ok) throw new Error('Failed to generate quest')
+      if (!response.ok) throw new Error("Failed to generate quest");
 
-      const questData = await response.json()
-      
+      const questData = await response.json();
+
       const questWithId = {
         ...questData,
         id: Date.now().toString(),
         tasks: questData.tasks.map((task: Task) => ({
           ...task,
           id: task.id || Math.random().toString(36).substr(2, 9),
-          completed: false
-        }))
-      }
+          completed: false,
+        })),
+      };
 
-      setGeneratedQuest(questWithId)
-      setSelectedTasks({})
+      setGeneratedQuest(questWithId);
+      setSelectedTasks({});
     } catch (error) {
-      console.error('Error generating quest:', error)
-      setError('Failed to generate quest. Please try again.')
+      console.error("Error generating quest:", error);
+      setError("Failed to generate quest. Please try again.");
     } finally {
-      setLoadingQuest(false)
+      setLoadingQuest(false);
     }
-  }
+  };
 
   const handleTaskSelection = (taskId: string) => {
-    setSelectedTasks(prev => ({
+    setSelectedTasks((prev) => ({
       ...prev,
-      [taskId]: !prev[taskId]
-    }))
-  }
+      [taskId]: !prev[taskId],
+    }));
+  };
 
   const handleSaveQuest = async () => {
-    if (!generatedQuest) return
-    
+    if (!generatedQuest) return;
+
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) {
         // Redirect to login if not authenticated
-        window.location.href = '/login'
-        return
+        window.location.href = "/login";
+        return;
       }
 
       const selectedTasksList = generatedQuest.tasks.filter(
-        task => selectedTasks[task.id]
-      )
+        (task) => selectedTasks[task.id]
+      );
 
-      const { error } = await supabase
-        .from('quests')
-        .insert({
-          user_id: session.user.id,
-          title: generatedQuest.title,
-          description: generatedQuest.description,
-          difficulty: generatedQuest.difficulty,
-          xp: generatedQuest.xp,
-          selected_tasks: selectedTasksList
-        })
+      const { error } = await supabase.from("quests").insert({
+        user_id: session.user.id,
+        title: generatedQuest.title,
+        description: generatedQuest.description,
+        difficulty: generatedQuest.difficulty,
+        xp: generatedQuest.xp,
+        selected_tasks: selectedTasksList,
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
-      setQuests(prev => [...prev, {
-        ...generatedQuest,
-        tasks: selectedTasksList
-      }])
-      setGeneratedQuest(null)
-      setSelectedTasks({})
+      setQuests((prev) => [
+        ...prev,
+        {
+          ...generatedQuest,
+          tasks: selectedTasksList,
+        },
+      ]);
+      setGeneratedQuest(null);
+      setSelectedTasks({});
     } catch (error) {
-      console.error('Error saving quest:', error)
-      setError('Failed to save quest. Please try again.')
+      console.error("Error saving quest:", error);
+      setError("Failed to save quest. Please try again.");
     }
-  }
+  };
 
-  const toggleTask = (questId: string, taskId: string) => {
-    setQuests(prev => prev.map(quest => {
-      if (quest.id === questId) {
-        return {
-          ...quest,
-          tasks: quest.tasks.map(task => {
+  const toggleTask = async (questId: string, taskId: string) => {
+    setQuests((prev) =>
+      prev.map((quest) => {
+        if (quest.id === questId) {
+          const updatedTasks = quest.tasks.map((task) => {
             if (task.id === taskId) {
-              return { ...task, completed: !task.completed }
+              return { ...task, completed: !task.completed };
             }
-            return task
-          })
+            return task;
+          });
+
+          // Check if all tasks are completed
+          const allCompleted = updatedTasks.every((task) => task.completed);
+
+          // Update the quest's completed status in the database if all tasks are completed
+          if (allCompleted) {
+            supabase
+              .from("quests")
+              .update({ completed: true })
+              .eq("id", questId)
+              .then(({ error }) => {
+                if (error) {
+                  console.error(
+                    "Error updating quest completion status:",
+                    error
+                  );
+                }
+              });
+          }
+
+          return {
+            ...quest,
+            tasks: updatedTasks,
+          };
         }
-      }
-      return quest
-    }))
-  }
+        return quest;
+      })
+    );
+  };
 
   return (
     <div className="flex">
@@ -181,7 +212,9 @@ export default function QuestsPage() {
                   <Crown className="h-8 w-8 text-violet-400" />
                   Your Quests
                 </h1>
-                <p className="text-violet-300/80 mt-2">Transform your goals into achievable quests</p>
+                <p className="text-violet-300/80 mt-2">
+                  Transform your goals into achievable quests
+                </p>
               </div>
               <Button
                 onClick={() => setShowForm(true)}
@@ -256,16 +289,21 @@ export default function QuestsPage() {
                             "flex items-center gap-3 w-full p-4 rounded-lg transition-all duration-300",
                             "bg-violet-950/40 border border-violet-500/20",
                             "hover:bg-violet-500/20 hover:border-violet-500/40",
-                            selectedTasks[task.id] && "bg-violet-500/30 border-violet-500/50"
+                            selectedTasks[task.id] &&
+                              "bg-violet-500/30 border-violet-500/50"
                           )}
                         >
-                          <CheckCircle2 
+                          <CheckCircle2
                             className={cn(
                               "h-5 w-5 shrink-0",
-                              selectedTasks[task.id] ? "text-violet-400 fill-violet-400" : "text-violet-400/50"
+                              selectedTasks[task.id]
+                                ? "text-violet-400 fill-violet-400"
+                                : "text-violet-400/50"
                             )}
                           />
-                          <span className="text-left text-violet-100">{task.description}</span>
+                          <span className="text-left text-violet-100">
+                            {task.description}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -274,8 +312,8 @@ export default function QuestsPage() {
                         type="button"
                         variant="outline"
                         onClick={() => {
-                          setGeneratedQuest(null)
-                          setSelectedTasks({})
+                          setGeneratedQuest(null);
+                          setSelectedTasks({});
                         }}
                         className="border-violet-500/50 text-violet-300"
                       >
@@ -298,8 +336,8 @@ export default function QuestsPage() {
             {/* Quests Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {quests.map((quest) => (
-                <Card 
-                  key={quest.id} 
+                <Card
+                  key={quest.id}
                   className="bg-[#0E0529]/80 border-violet-500/30 overflow-hidden hover:border-violet-500/50 transition-all duration-300 shadow-lg shadow-violet-500/10"
                 >
                   <div className="p-6">
@@ -312,7 +350,7 @@ export default function QuestsPage() {
                           {quest.description}
                         </p>
                       </div>
-                      <Badge 
+                      <Badge
                         variant="secondary"
                         className="bg-violet-500/20 text-violet-200 border-violet-500/30 text-sm font-medium"
                       >
@@ -329,19 +367,25 @@ export default function QuestsPage() {
                             "flex items-center gap-3 w-full p-4 rounded-lg transition-all duration-300",
                             "bg-violet-950/40 border border-violet-500/20",
                             "hover:bg-violet-500/10 hover:border-violet-500/30",
-                            task.completed && "bg-violet-500/10 border-violet-500/30"
+                            task.completed &&
+                              "bg-violet-500/10 border-violet-500/30"
                           )}
                         >
-                          <CheckCircle2 
+                          <CheckCircle2
                             className={cn(
                               "h-5 w-5 shrink-0",
-                              task.completed ? "text-violet-400 fill-violet-400" : "text-violet-400/50"
+                              task.completed
+                                ? "text-violet-400 fill-violet-400"
+                                : "text-violet-400/50"
                             )}
                           />
-                          <span className={cn(
-                            "text-left text-violet-100",
-                            task.completed && "line-through text-violet-300/70"
-                          )}>
+                          <span
+                            className={cn(
+                              "text-left text-violet-100",
+                              task.completed &&
+                                "line-through text-violet-300/70"
+                            )}
+                          >
                             {task.description}
                           </span>
                         </button>
@@ -350,15 +394,15 @@ export default function QuestsPage() {
 
                     <div className="mt-6 pt-4 border-t border-violet-500/20">
                       <div className="flex items-center justify-between">
-                        <Badge 
+                        <Badge
                           variant="secondary"
                           className="bg-violet-500/20 text-violet-200 border-violet-500/30"
                         >
                           {quest.difficulty}
                         </Badge>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="text-violet-300 hover:text-violet-200 hover:bg-violet-500/10"
                         >
                           View Details
@@ -375,7 +419,9 @@ export default function QuestsPage() {
             {quests.length === 0 && !showForm && (
               <div className="text-center py-12">
                 <Crown className="h-12 w-12 text-violet-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-violet-100 mb-2">No Quests Yet</h3>
+                <h3 className="text-xl font-semibold text-violet-100 mb-2">
+                  No Quests Yet
+                </h3>
                 <p className="text-violet-300/80 mb-6">
                   Create your first quest and start your journey
                 </p>
@@ -392,5 +438,5 @@ export default function QuestsPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

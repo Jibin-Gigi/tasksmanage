@@ -34,6 +34,7 @@ export default function TaskVerification() {
   const searchParams = useSearchParams();
   const taskId = searchParams.get("taskId");
   const category = searchParams.get("category");
+  const questId = searchParams.get("questId");
   const { user } = useAuth();
 
   const [task, setTask] = useState<Task | null>(null);
@@ -43,13 +44,15 @@ export default function TaskVerification() {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [correctAnswerList, setCorrectAnswerList] = useState<string[][]>([]); // New state for storing correct answer lists
+  const [correctAnswerList, setCorrectAnswerList] = useState<string[][]>([]);
+  const [streak, setStreak] = useState(1); // New state for storing correct answer lists
 
-  let streak = 0;
+  const required_questId = questId;
+  const required_taskId = taskId || "";
   let multiplier = 1.0;
 
   useEffect(() => {
-    if (taskId) {
+    if (taskId || questId) {
       fetchTaskAndGenerateQuiz();
     }
   }, [taskId]);
@@ -60,43 +63,49 @@ export default function TaskVerification() {
         throw new Error("No task ID provided");
       }
 
-      let { data: dailyTask, error: dailyError } = await supabase
-        .from("dailies")
-        .select("*")
-        .eq("id", taskId)
-        .single();
-
       let taskData = null;
 
-      streak = dailyTask.streak;
-      multiplier = dailyTask.multiplier;
+      if (!questId) {
+        let { data: dailyTask, error: dailyError } = await supabase
+          .from("dailies")
+          .select("*")
+          .eq("id", taskId)
+          .single();
 
-      if (dailyTask) {
-        taskData = {
-          id: dailyTask.id,
-          title: dailyTask.title,
-          description: dailyTask.description,
-          category: dailyTask.category,
-        };
+        // if (dailyError || !dailyTask) {
+        //   throw new Error("Task not found or error fetching task");
+        // }
+
+        if (dailyTask) {
+          setStreak(dailyTask.streak);
+          multiplier = dailyTask.multiplier;
+
+          taskData = {
+            id: dailyTask.id,
+            title: dailyTask.title,
+            description: dailyTask.description,
+            category: dailyTask.category,
+          };
+        }
       } else {
         const { data: questData, error: questError } = await supabase
           .from("quests")
           .select("*")
-          .eq("id", taskId)
-          .eq("user_id", user?.id)
+          .eq("id", questId)
           .single();
 
-        if (questData && questData.selected_tasks) {
-          const selectedTask = questData.selected_tasks.find(
-            (task: any) => task.id === taskId
-          );
+        if (questData && !questError) {
+          console.log(questData);
+          const selectedTask = questData.selected_tasks[taskId];
+          console.log(selectedTask);
+          //setSelectedTasks(selectedTask);
 
           if (selectedTask) {
             taskData = {
               id: selectedTask.id,
               title: questData.title,
               description: selectedTask.description,
-              category: category || "Quest Task",
+              category: "Quest Task",
             };
           }
         }
@@ -243,18 +252,34 @@ export default function TaskVerification() {
             .eq("user_id", user?.id);
         }
 
-        streak += 1;
+        //setStreak(1);
 
-        const timestamp = new Date().toISOString();
-        await supabase
-          .from("dailies")
-          .update({
-            last_completed: timestamp,
-            streak: streak,
-            multiplier: multiplier,
-          })
-          .eq("user_id", user?.id)
-          .eq("id", taskId);
+        if (!questId) {
+          const timestamp = new Date().toISOString();
+          await supabase
+            .from("dailies")
+            .update({
+              last_completed: timestamp,
+              streak: streak,
+              multiplier: multiplier,
+            })
+            .eq("user_id", user?.id)
+            .eq("id", taskId);
+        } else {
+          const { data: questData, error: questError } = await supabase
+            .from("quests")
+            .select("*")
+            .eq("id", questId)
+            .single();
+
+          const selected_tasks = questData.selected_tasks;
+          selected_tasks[required_taskId].completed = true;
+
+          await supabase
+            .from("quests")
+            .update({ selected_tasks: selected_tasks })
+            .eq("id", questId);
+        }
       } catch (error) {
         console.error("Error updating experience points:", error);
       }

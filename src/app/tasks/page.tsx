@@ -112,7 +112,11 @@ export default function TasksPage() {
   };
 
   const handleVerifyTask = (taskId: string, category: string) => {
-    window.location.href = `/task-verification?taskId=${taskId}&category=${category}`;
+    if (!isNaN(Number(category))) {
+      window.location.href = `/task-verification?questId=${taskId}&taskId=${category}`;
+    } else {
+      window.location.href = `/task-verification?taskId=${taskId}&category=${category}`;
+    }
   };
 
   const filteredDailies = dailies.filter(
@@ -259,17 +263,16 @@ export default function TasksPage() {
                                 key={task.id}
                                 className="flex items-start gap-4"
                               >
-                                <button
-                                  onClick={() =>
-                                    handleVerifyTask(
-                                      quest.id,
-                                      `quest-task-${index}`
-                                    )
-                                  }
-                                  className="mt-1 p-2 rounded-full bg-violet-950/80 text-violet-400 hover:bg-violet-500/20 transition-all duration-300"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </button>
+                                {!task.completed && (
+                                  <button
+                                    onClick={() =>
+                                      handleVerifyTask(quest.id, `${index}`)
+                                    }
+                                    className="mt-1 p-2 rounded-full bg-violet-950/80 text-violet-400 hover:bg-violet-500/20 transition-all duration-300"
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </button>
+                                )}
                                 <div>
                                   <p className="text-violet-200">
                                     {task.description}
