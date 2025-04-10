@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Sidebar from "@/components/Sidebar";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Initialize Gemini Pro
 const genAI = new GoogleGenerativeAI(
@@ -20,7 +21,7 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 interface Quiz {
   question: string;
   options: string[];
-  correctAnswer: string;
+  correctAnswer: string | string[]; // Allow single or multiple correct answers
 }
 
 interface Task {
@@ -43,6 +44,18 @@ export default function TaskVerification() {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [correctAnswerList, setCorrectAnswerList] = useState<string[][]>([]); // New state for storing correct answer lists
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     if (taskId) {
@@ -111,15 +124,15 @@ export default function TaskVerification() {
           {
             "question": "Question text here?",
             "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-            "correctAnswer": "The correct option text"
+            "correctAnswer": "The correct option as list (if task is related to workout,mark more than one option as correct answer if it is logically correct or possible )"
           }
         ]
         
         Requirements:
         1. Each question should verify different aspects of task completion
         2. Each question must have exactly 4 options
-        3. The correctAnswer must match exactly one of the options
-        4. Questions should be relevant to the task details
+        3. The correctAnswer must match exactly one of the options (or multiple, if workout related)
+        4. Questions should be relevant to the task details. If task is related to workout ask no.of reps completed, no.of sets, area where pain feels etc to find whether the poster is correct or not.
         5. Format as valid JSON that can be parsed`;
 
       const result = await model.generateContent(prompt);
@@ -131,14 +144,22 @@ export default function TaskVerification() {
       }
 
       try {
-        //Remove Code blocks and any extra text that might be around the json.
         const cleanedText = text
           .replace(/```(json)?\n/g, "")
           .replace(/```/g, "");
         const generatedQuizzes = JSON.parse(cleanedText);
-        console.log("Generated Quizzes:", generatedQuizzes); // Add this line
+        console.log("Generated Quizzes:", generatedQuizzes);
         if (Array.isArray(generatedQuizzes) && generatedQuizzes.length > 0) {
           setQuizzes(generatedQuizzes);
+
+          const answerLists = generatedQuizzes.map((quiz) => {
+            if (Array.isArray(quiz.correctAnswer)) {
+              return quiz.correctAnswer;
+            } else {
+              return [quiz.correctAnswer];
+            }
+          });
+          setCorrectAnswerList(answerLists);
         } else {
           throw new Error("Invalid quiz format from AI");
         }
@@ -164,6 +185,7 @@ export default function TaskVerification() {
             correctAnswer: "Yes, completed",
           },
         ]);
+        setCorrectAnswerList([["Yes, completed"]]);
       }
     }
   };
@@ -183,29 +205,71 @@ export default function TaskVerification() {
   };
 
   const calculateScore = async () => {
-    const correctAnswers = quizzes.filter(
-      (quiz, index) => quiz.correctAnswer === selectedAnswers[index]
-    ).length;
+    if (!user) {
+      console.error("User is not authenticated");
+      return; // Handle the case where the user is not logged in
+    }
 
-    const percentage = (correctAnswers / quizzes.length) * 100;
+    console.log("User ID:", user?.id);
+
+    let correctCount = 0;
+    for (let i = 0; i < quizzes.length; i++) {
+      if (correctAnswerList[i].includes(selectedAnswers[i])) {
+        correctCount++;
+      }
+    }
+
+    const percentage = (correctCount / quizzes.length) * 100;
     setScore(percentage);
     setQuizCompleted(true);
 
-    if (percentage >= 75) {
+    if (percentage >= 60) {
       try {
-        const { data: userData } = await supabase
-          .from("users")
-          .select("experience_points")
+        const { data: userData, error: userError } = await supabase
+          .from("xp_points")
+          .select("total_points")
           .eq("id", user?.id)
           .single();
 
-        const experiencePoints = userData?.experience_points || 0;
-        const newPoints = experiencePoints + 50;
+        if (userError) {
+          console.error("Error fetching user data:", userError);
+        }
 
-        await supabase
-          .from("users")
-          .update({ experience_points: newPoints })
-          .eq("id", user?.id);
+        if (!userData) {
+          // Create a new row in xp_points table for the user
+          const { error: insertError } = await supabase
+            .from("xp_points")
+            .insert([{ id: user?.id, total_points: 0 }]); // Initialize with 0 points
+
+          if (insertError) {
+            console.error("Error creating new xp_points entry:", insertError);
+            return; // Handle the error as needed
+          }
+
+          // Fetch the newly created user data
+          const { data: newUserData } = await supabase
+            .from("xp_points")
+            .select("total_points")
+            .eq("id", user?.id)
+            .single();
+
+          // Proceed with the rest of your logic using newUserData
+          const experiencePoints = newUserData?.total_points || 0;
+          const newPoints = experiencePoints + 50;
+
+          await supabase
+            .from("xp_points")
+            .update({ total_points: newPoints })
+            .eq("id", user?.id);
+        } else {
+          const experiencePoints = userData?.total_points || 0;
+          const newPoints = experiencePoints + 50;
+
+          await supabase
+            .from("xp_points")
+            .update({ total_points: newPoints })
+            .eq("id", user?.id);
+        }
       } catch (error) {
         console.error("Error updating experience points:", error);
       }
@@ -293,7 +357,7 @@ export default function TaskVerification() {
               </div>
             ) : (
               <div className="text-center space-y-6 relative z-10">
-                {score >= 75 ? (
+                {score >= 60 ? (
                   <>
                     <Trophy className="h-20 w-20 text-yellow-500 mx-auto animate-bounce" />
                     <div className="space-y-2">
@@ -314,7 +378,7 @@ export default function TaskVerification() {
                         Keep Practicing!
                       </h2>
                       <p className="text-xl text-violet-300">
-                        You scored {score.toFixed(1)}%. You need 75% to earn
+                        You scored {score.toFixed(1)}%. You need 60% to earn
                         experience points.
                       </p>
                     </div>
