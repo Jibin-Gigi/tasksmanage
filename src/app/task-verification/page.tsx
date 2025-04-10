@@ -10,7 +10,6 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Sidebar from "@/components/Sidebar";
-import { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Initialize Gemini Pro
 const genAI = new GoogleGenerativeAI(
@@ -44,18 +43,10 @@ export default function TaskVerification() {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [correctAnswerList, setCorrectAnswerList] = useState<string[][]>([]); // New state for storing correct answer lists
 
-  useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-    getUser();
-  }, []);
+  let streak = 0;
+  let multiplier = 1.0;
 
   useEffect(() => {
     if (taskId) {
@@ -77,6 +68,9 @@ export default function TaskVerification() {
 
       let taskData = null;
 
+      streak = dailyTask.streak;
+      multiplier = dailyTask.multiplier;
+
       if (dailyTask) {
         taskData = {
           id: dailyTask.id,
@@ -89,6 +83,7 @@ export default function TaskVerification() {
           .from("quests")
           .select("*")
           .eq("id", taskId)
+          .eq("user_id", user?.id)
           .single();
 
         if (questData && questData.selected_tasks) {
@@ -124,7 +119,7 @@ export default function TaskVerification() {
           {
             "question": "Question text here?",
             "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-            "correctAnswer": "The correct option as list (if task is related to workout,mark more than one option as correct answer if it is logically correct or possible )"
+            "correctAnswer": "The correct option as list (if task is related to workout or health or sleep or something which cannot be marked by just one answer,mark more than one option as correct answer if it is logically correct or possible )"
           }
         ]
         
@@ -205,13 +200,6 @@ export default function TaskVerification() {
   };
 
   const calculateScore = async () => {
-    if (!user) {
-      console.error("User is not authenticated");
-      return; // Handle the case where the user is not logged in
-    }
-
-    console.log("User ID:", user?.id);
-
     let correctCount = 0;
     for (let i = 0; i < quizzes.length; i++) {
       if (correctAnswerList[i].includes(selectedAnswers[i])) {
@@ -225,51 +213,48 @@ export default function TaskVerification() {
 
     if (percentage >= 60) {
       try {
-        const { data: userData, error: userError } = await supabase
+        console.log(user);
+
+        const { data: userData } = await supabase
           .from("xp_points")
           .select("total_points")
-          .eq("id", user?.id)
+          .eq("user_id", user?.id)
           .single();
 
-        if (userError) {
-          console.error("Error fetching user data:", userError);
-        }
+        console.log(userData);
+
+        multiplier += 0.1;
+        const experiencePoints = userData?.total_points || 0;
+        const newPoints = experiencePoints + 50 * multiplier;
 
         if (!userData) {
-          // Create a new row in xp_points table for the user
           const { error: insertError } = await supabase
             .from("xp_points")
-            .insert([{ id: user?.id, total_points: 0 }]); // Initialize with 0 points
+            .insert([{ user_id: user?.id, total_points: newPoints }]); // Initialize with 0 points
 
           if (insertError) {
             console.error("Error creating new xp_points entry:", insertError);
             return; // Handle the error as needed
           }
-
-          // Fetch the newly created user data
-          const { data: newUserData } = await supabase
-            .from("xp_points")
-            .select("total_points")
-            .eq("id", user?.id)
-            .single();
-
-          // Proceed with the rest of your logic using newUserData
-          const experiencePoints = newUserData?.total_points || 0;
-          const newPoints = experiencePoints + 50;
-
-          await supabase
-            .from("xp_points")
-            .update({ total_points: newPoints })
-            .eq("id", user?.id);
         } else {
-          const experiencePoints = userData?.total_points || 0;
-          const newPoints = experiencePoints + 50;
-
           await supabase
             .from("xp_points")
             .update({ total_points: newPoints })
-            .eq("id", user?.id);
+            .eq("user_id", user?.id);
         }
+
+        streak += 1;
+
+        const timestamp = new Date().toISOString();
+        await supabase
+          .from("dailies")
+          .update({
+            last_completed: timestamp,
+            streak: streak,
+            multiplier: multiplier,
+          })
+          .eq("user_id", user?.id)
+          .eq("id", taskId);
       } catch (error) {
         console.error("Error updating experience points:", error);
       }
