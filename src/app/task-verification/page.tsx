@@ -288,7 +288,7 @@ export default function TaskVerification() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-[#0E0529] text-white">
         Loading...
       </div>
     );
