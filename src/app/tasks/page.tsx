@@ -56,6 +56,7 @@ export default function TasksPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [expandedQuests, setExpandedQuests] = useState<string[]>([]); // Move state here
+  //const [reload, setReload] = useState(false);
 
   const toggleQuestExpansion = (questId: string) => {
     // Move function here
@@ -100,7 +101,43 @@ export default function TasksPage() {
         .from("quests")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .eq("received_xp_points", false);
+
+      const formattedQuests = (questsData || []).map(
+        async (quest: QuestTask) => {
+          const selected_tasks = quest.selected_tasks || [];
+          const remaining = selected_tasks.filter(
+            (task) => !task.completed
+          ).length;
+          console.log(`Quest "${quest.title}" remaining: ${remaining}`);
+          if (remaining === 0) {
+            console.log(`Quest "${quest.title}" is completed`);
+
+            const { data: userData, error: userError } = await supabase
+              .from("xp_points")
+              .select("total_points")
+              .eq("user_id", user?.id)
+              .single();
+
+            if (userError) throw userError;
+
+            const experiencePoints = userData?.total_points || 0;
+            const xp_points = quest.xp + experiencePoints;
+            await supabase
+              .from("xp_points")
+              .update({ total_points: xp_points })
+              .eq("user_id", user?.id);
+
+            await supabase
+              .from("quests")
+              .update({ completed: true, received_xp_points: true })
+              .eq("id", quest.id);
+
+            window.location.reload();
+          }
+        }
+      );
 
       if (questsError) throw questsError;
       setQuests(questsData || []);
