@@ -77,7 +77,16 @@ export default function TaskVerification() {
         // }
 
         if (dailyTask) {
-          setStreak(dailyTask.streak);
+          const today = new Date();
+          const last_completed_date = new Date(dailyTask.last_completed);
+          const oneDay = 24 * 60 * 60 * 1000; // milliseconds in one day
+          if (
+            Math.abs(today.getTime() - last_completed_date.getTime()) > oneDay
+          ) {
+            setStreak(1);
+          } else {
+            setStreak(dailyTask.streak);
+          }
           multiplier = dailyTask.multiplier;
 
           taskData = {
@@ -232,6 +241,7 @@ export default function TaskVerification() {
 
         console.log(userData);
 
+        setStreak(streak + 1);
         multiplier += 0.1;
         const experiencePoints = userData?.total_points || 0;
         const newPoints = experiencePoints + 50 * multiplier;
