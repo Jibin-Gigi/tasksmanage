@@ -160,43 +160,45 @@ export default function QuestsPage() {
   };
 
   const toggleTask = async (questId: string, taskId: string) => {
-    setQuests((prev) =>
-      prev.map((quest) => {
-        if (quest.id === questId) {
-          const updatedTasks = quest.tasks.map((task) => {
-            if (task.id === taskId) {
-              return { ...task, completed: !task.completed };
-            }
-            return task;
-          });
+    window.location.href = `/task-verification?questId=${questId}&taskId=${taskId}`;
 
-          // Check if all tasks are completed
-          const allCompleted = updatedTasks.every((task) => task.completed);
+    // setQuests((prev) =>
+    //   prev.map((quest) => {
+    //     if (quest.id === questId) {
+    //       const updatedTasks = quest.tasks.map((task) => {
+    //         if (task.id === taskId) {
+    //           return { ...task, completed: !task.completed };
+    //         }
+    //         return task;
+    //       });
 
-          // Update the quest's completed status in the database if all tasks are completed
-          if (allCompleted) {
-            supabase
-              .from("quests")
-              .update({ completed: true })
-              .eq("id", questId)
-              .then(({ error }) => {
-                if (error) {
-                  console.error(
-                    "Error updating quest completion status:",
-                    error
-                  );
-                }
-              });
-          }
+    //       // Check if all tasks are completed
+    //       const allCompleted = updatedTasks.every((task) => task.completed);
 
-          return {
-            ...quest,
-            tasks: updatedTasks,
-          };
-        }
-        return quest;
-      })
-    );
+    //       // Update the quest's completed status in the database if all tasks are completed
+    //       if (allCompleted) {
+    //         supabase
+    //           .from("quests")
+    //           .update({ completed: true })
+    //           .eq("id", questId)
+    //           .then(({ error }) => {
+    //             if (error) {
+    //               console.error(
+    //                 "Error updating quest completion status:",
+    //                 error
+    //               );
+    //             }
+    //           });
+    //       }
+
+    //       return {
+    //         ...quest,
+    //         tasks: updatedTasks,
+    //       };
+    //     }
+    //     return quest;
+    //   })
+    // );
   };
 
   return (

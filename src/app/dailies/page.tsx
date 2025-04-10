@@ -1,139 +1,157 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Zap, Plus, CheckCircle2, ArrowRight, Bell, Tag, Trophy, Sparkles } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { cn } from "@/lib/utils"
-import Sidebar from '@/components/Sidebar'
-import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
+import { useState, useEffect } from "react";
+import {
+  Zap,
+  Plus,
+  CheckCircle2,
+  ArrowRight,
+  Bell,
+  Tag,
+  Trophy,
+  Sparkles,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import Sidebar from "@/components/Sidebar";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DailyTask {
-  id: string
-  title: string
-  description: string
-  category: string
-  completed: boolean
-  streak: number
-  xp: number
-  reminders: boolean
-  last_completed: string | null
-  multiplier: number
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  completed: boolean;
+  streak: number;
+  xp: number;
+  reminders: boolean;
+  last_completed: string | null;
+  multiplier: number;
 }
 
 interface Achievement {
-  id: string
-  title: string
-  description: string
-  icon: string
-  unlocked: boolean
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
 }
 
-const CATEGORIES = [
-  'Fitness',
-  'Study',
-  'Work',
-  'Health',
-  'Personal',
-  'Other'
-]
+const CATEGORIES = ["Fitness", "Study", "Work", "Health", "Personal", "Other"];
 
-const XP_BASE = 50
-const STREAK_MULTIPLIER = 0.1 // 10% bonus per day in streak
+const XP_BASE = 50;
+const STREAK_MULTIPLIER = 0.1; // 10% bonus per day in streak
 
 export default function DailiesPage() {
-  const { user, loading } = useAuth()
-  const [dailies, setDailies] = useState<DailyTask[]>([])
-  const [showForm, setShowForm] = useState(false)
+  const { user, loading } = useAuth();
+  const [dailies, setDailies] = useState<DailyTask[]>([]);
+  const [showForm, setShowForm] = useState(false);
   const [newDaily, setNewDaily] = useState({
-    title: '',
-    description: '',
-    category: 'Other',
-    reminders: false
-  })
-  const [error, setError] = useState<string | null>(null)
-  const [achievements, setAchievements] = useState<Achievement[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [currentTime, setCurrentTime] = useState(new Date())
-  const [timeUntilMidnight, setTimeUntilMidnight] = useState('')
+    title: "",
+    description: "",
+    category: "Other",
+    reminders: false,
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [timeUntilMidnight, setTimeUntilMidnight] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/login'
-      return
+      window.location.href = "/login";
+      return;
     }
 
     const loadDailies = async () => {
       try {
-        if (!user) return
+        if (!user) return;
 
         const { data, error } = await supabase
-          .from('dailies')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: true })
+          .from("dailies")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: true });
 
-        if (error) throw error
+        if (error) throw error;
 
         // Check for tasks that need to be reset
-        const updatedDailies = data.map(daily => {
-          const lastCompleted = new Date(daily.last_completed || '2000-01-01')
-          const today = new Date()
+        const updatedDailies = data.map((daily) => {
+          const lastCompleted = new Date(daily.last_completed || "2000-01-01");
+          const today = new Date();
           if (lastCompleted.getDate() !== today.getDate()) {
-            return { ...daily, completed: false }
+            return { ...daily, completed: false };
           }
-          return daily
-        })
+          return daily;
+        });
 
-        setDailies(updatedDailies)
+        setDailies(updatedDailies);
       } catch (error) {
-        console.error('Error loading dailies:', error)
+        console.error("Error loading dailies:", error);
       }
-    }
+    };
 
-    loadDailies()
+    loadDailies();
     // Set up midnight reset
-    const now = new Date()
-    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
-    const timeUntilMidnight = tomorrow.getTime() - now.getTime()
+    const now = new Date();
+    const tomorrow = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1
+    );
+    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
 
     const midnightReset = setTimeout(() => {
-      loadDailies()
-    }, timeUntilMidnight)
+      loadDailies();
+    }, timeUntilMidnight);
 
-    return () => clearTimeout(midnightReset)
-  }, [user, loading])
+    return () => clearTimeout(midnightReset);
+  }, [user, loading]);
 
   // Add timer effect
   useEffect(() => {
     const timer = setInterval(() => {
-      const now = new Date()
-      setCurrentTime(now)
-      
-      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
-      const msUntilMidnight = tomorrow.getTime() - now.getTime()
-      
-      const hours = Math.floor(msUntilMidnight / (1000 * 60 * 60))
-      const minutes = Math.floor((msUntilMidnight % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((msUntilMidnight % (1000 * 60)) / 1000)
-      
-      setTimeUntilMidnight(`${hours}h ${minutes}m ${seconds}s`)
-    }, 1000)
+      const now = new Date();
+      setCurrentTime(now);
 
-    return () => clearInterval(timer)
-  }, [])
+      const tomorrow = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1
+      );
+      const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+      const hours = Math.floor(msUntilMidnight / (1000 * 60 * 60));
+      const minutes = Math.floor(
+        (msUntilMidnight % (1000 * 60 * 60)) / (1000 * 60)
+      );
+      const seconds = Math.floor((msUntilMidnight % (1000 * 60)) / 1000);
+
+      setTimeUntilMidnight(`${hours}h ${minutes}m ${seconds}s`);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (!user?.id) {
-        setError('You must be logged in to create tasks')
-        return
+        setError("You must be logged in to create tasks");
+        return;
       }
 
       const newTask = {
@@ -146,142 +164,159 @@ export default function DailiesPage() {
         xp: XP_BASE,
         reminders: newDaily.reminders,
         last_completed: null,
-        multiplier: 1
-      }
+        multiplier: 1,
+      };
 
       const { data, error: supabaseError } = await supabase
-        .from('dailies')
+        .from("dailies")
         .insert(newTask)
         .select()
-        .single()
+        .single();
 
       if (supabaseError) {
-        console.error('Supabase error:', supabaseError)
-        throw new Error(supabaseError.message)
+        console.error("Supabase error:", supabaseError);
+        throw new Error(supabaseError.message);
       }
 
       if (!data) {
-        throw new Error('No data returned from insert')
+        throw new Error("No data returned from insert");
       }
 
-      setDailies(prev => [...prev, data])
-      setNewDaily({ title: '', description: '', category: 'Other', reminders: false })
-      setShowForm(false)
-      setError(null) // Clear any existing errors
+      setDailies((prev) => [...prev, data]);
+      setNewDaily({
+        title: "",
+        description: "",
+        category: "Other",
+        reminders: false,
+      });
+      setShowForm(false);
+      setError(null); // Clear any existing errors
     } catch (error) {
-      console.error('Error creating daily:', error)
-      setError(error instanceof Error ? error.message : 'Failed to create daily task. Please try again.')
+      console.error("Error creating daily:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to create daily task. Please try again."
+      );
     }
-  }
+  };
 
-  const toggleDaily = async (taskId: string) => {
+  const toggleDaily = async (taskId: string, category: string) => {
     try {
-      const daily = dailies.find(d => d.id === taskId)
-      if (!daily) return
+      window.location.href = `/task-verification?taskId=${taskId}&category=${category}`;
+      // const daily = dailies.find((d) => d.id === taskId);
+      // if (!daily) return;
 
-      const now = new Date()
-      const lastCompleted = new Date(daily.last_completed || '2000-01-01')
-      const isNewDay = lastCompleted.getDate() !== now.getDate()
-      
-      const newStreak = !daily.completed
-        ? (isNewDay ? daily.streak + 1 : daily.streak)
-        : daily.streak
+      // const now = new Date();
+      // const lastCompleted = new Date(daily.last_completed || "2000-01-01");
+      // const isNewDay = lastCompleted.getDate() !== now.getDate();
 
-      const multiplier = 1 + (newStreak * STREAK_MULTIPLIER)
-      const xpEarned = Math.round(XP_BASE * multiplier)
+      // const newStreak = !daily.completed
+      //   ? isNewDay
+      //     ? daily.streak + 1
+      //     : daily.streak
+      //   : daily.streak;
 
-      const { error } = await supabase
-        .from('dailies')
-        .update({ 
-          completed: !daily.completed,
-          streak: newStreak,
-          last_completed: !daily.completed ? now.toISOString() : daily.last_completed,
-          multiplier
-        })
-        .eq('id', taskId)
+      // const multiplier = 1 + newStreak * STREAK_MULTIPLIER;
+      // const xpEarned = Math.round(XP_BASE * multiplier);
 
-      if (error) throw error
+      // const { error } = await supabase
+      //   .from("dailies")
+      //   .update({
+      //     completed: !daily.completed,
+      //     streak: newStreak,
+      //     last_completed: !daily.completed
+      //       ? now.toISOString()
+      //       : daily.last_completed,
+      //     multiplier,
+      //   })
+      //   .eq("id", taskId);
 
-      // Update user's XP if task is being completed
-      if (!daily.completed) {
-        await supabase.rpc('increment_user_xp', {
-          user_id: user?.id,
-          xp_amount: xpEarned
-        })
+      // if (error) throw error;
 
-        // Check for achievements
-        if (newStreak === 7) {
-          // Unlock "7-Day Streak" achievement
-          await unlockAchievement('7_day_streak')
-        }
-      }
+      // // Update user's XP if task is being completed
+      // if (!daily.completed) {
+      //   await supabase.rpc("increment_user_xp", {
+      //     user_id: user?.id,
+      //     xp_amount: xpEarned,
+      //   });
 
-      setDailies(prev => prev.map(d => {
-        if (d.id === taskId) {
-          return { 
-            ...d, 
-            completed: !d.completed,
-            streak: newStreak,
-            last_completed: !d.completed ? now.toISOString() : d.last_completed,
-            multiplier
-          }
-        }
-        return d
-      }))
+      //   // Check for achievements
+      //   if (newStreak === 7) {
+      //     // Unlock "7-Day Streak" achievement
+      //     await unlockAchievement("7_day_streak");
+      //   }
+      // }
+
+      // setDailies((prev) =>
+      //   prev.map((d) => {
+      //     if (d.id === taskId) {
+      //       return {
+      //         ...d,
+      //         completed: !d.completed,
+      //         streak: newStreak,
+      //         last_completed: !d.completed
+      //           ? now.toISOString()
+      //           : d.last_completed,
+      //         multiplier,
+      //       };
+      //     }
+      //     return d;
+      //   })
+      // );
     } catch (error) {
-      console.error('Error toggling daily:', error)
+      console.error("Error toggling daily:", error);
     }
-  }
+  };
 
   const unlockAchievement = async (achievementId: string) => {
     try {
-      const { error } = await supabase
-        .from('user_achievements')
-        .insert({
-          user_id: user?.id,
-          achievement_id: achievementId,
-          unlocked_at: new Date().toISOString()
-        })
+      const { error } = await supabase.from("user_achievements").insert({
+        user_id: user?.id,
+        achievement_id: achievementId,
+        unlocked_at: new Date().toISOString(),
+      });
 
-      if (error) throw error
+      if (error) throw error;
 
       // Show achievement notification
       // You can implement a toast notification here
     } catch (error) {
-      console.error('Error unlocking achievement:', error)
+      console.error("Error unlocking achievement:", error);
     }
-  }
+  };
 
   const generateAIChallenge = async () => {
     try {
-      const response = await fetch('/api/generate-daily-challenge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          existingTasks: dailies.map(d => d.title),
-          categories: CATEGORIES
-        })
-      })
+      const response = await fetch("/api/generate-daily-challenge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          existingTasks: dailies.map((d) => d.title),
+          categories: CATEGORIES,
+        }),
+      });
 
-      if (!response.ok) throw new Error('Failed to generate challenge')
+      if (!response.ok) throw new Error("Failed to generate challenge");
 
-      const challenge = await response.json()
+      const challenge = await response.json();
       setNewDaily({
         title: challenge.title,
         description: challenge.description,
         category: challenge.category,
-        reminders: false
-      })
-      setShowForm(true)
+        reminders: false,
+      });
+      setShowForm(true);
     } catch (error) {
-      console.error('Error generating challenge:', error)
-      setError('Failed to generate AI challenge. Please try again.')
+      console.error("Error generating challenge:", error);
+      setError("Failed to generate AI challenge. Please try again.");
     }
-  }
+  };
 
-  const filteredDailies = selectedCategory === 'all'
-    ? dailies
-    : dailies.filter(daily => daily.category === selectedCategory)
+  const filteredDailies =
+    selectedCategory === "all"
+      ? dailies
+      : dailies.filter((daily) => daily.category === selectedCategory);
 
   return (
     <div className="flex">
@@ -293,20 +328,22 @@ export default function DailiesPage() {
             <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center bg-[#0E0529]/50 p-4 rounded-lg border border-violet-500/20">
               <div>
                 <div className="text-violet-200 text-lg">
-                  {currentTime.toLocaleDateString('en-US', { 
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                  {currentTime.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </div>
                 <div className="text-violet-300/80 text-sm">
-                  {currentTime.toLocaleTimeString('en-US')}
+                  {currentTime.toLocaleTimeString("en-US")}
                 </div>
               </div>
               <div className="mt-2 md:mt-0">
                 <div className="text-violet-200">Time until reset</div>
-                <div className="text-violet-400 font-mono">{timeUntilMidnight}</div>
+                <div className="text-violet-400 font-mono">
+                  {timeUntilMidnight}
+                </div>
               </div>
             </div>
 
@@ -317,17 +354,19 @@ export default function DailiesPage() {
                   <Zap className="h-8 w-8 text-violet-400" />
                   Daily Tasks
                 </h1>
-                <p className="text-violet-300/80 mt-2">Build habits with daily challenges</p>
+                <p className="text-violet-300/80 mt-2">
+                  Build habits with daily challenges
+                </p>
               </div>
               <div className="flex gap-4 mt-4 md:mt-0">
-                <Button
+                {/* <Button
                   onClick={generateAIChallenge}
                   variant="outline"
                   className="border-violet-500/50 text-violet-300"
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
                   AI Challenge
-                </Button>
+                </Button> */}
                 <Button
                   onClick={() => setShowForm(true)}
                   className="bg-violet-600 hover:bg-violet-500 text-white"
@@ -349,7 +388,7 @@ export default function DailiesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {CATEGORIES.map(category => (
+                  {CATEGORIES.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
                     </SelectItem>
@@ -373,7 +412,12 @@ export default function DailiesPage() {
                     </label>
                     <Input
                       value={newDaily.title}
-                      onChange={(e) => setNewDaily(prev => ({ ...prev, title: e.target.value }))}
+                      onChange={(e) =>
+                        setNewDaily((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
                       className="bg-violet-950/50 border-violet-500/30 text-violet-100"
                       placeholder="Enter task title..."
                       required
@@ -385,7 +429,12 @@ export default function DailiesPage() {
                     </label>
                     <Input
                       value={newDaily.description}
-                      onChange={(e) => setNewDaily(prev => ({ ...prev, description: e.target.value }))}
+                      onChange={(e) =>
+                        setNewDaily((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
                       className="bg-violet-950/50 border-violet-500/30 text-violet-100"
                       placeholder="Enter task description..."
                       required
@@ -397,13 +446,15 @@ export default function DailiesPage() {
                     </label>
                     <Select
                       value={newDaily.category}
-                      onValueChange={(value) => setNewDaily(prev => ({ ...prev, category: value }))}
+                      onValueChange={(value) =>
+                        setNewDaily((prev) => ({ ...prev, category: value }))
+                      }
                     >
                       <SelectTrigger className="bg-violet-950/50 border-violet-500/30">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {CATEGORIES.map(category => (
+                        {CATEGORIES.map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
                           </SelectItem>
@@ -414,7 +465,9 @@ export default function DailiesPage() {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={newDaily.reminders}
-                      onCheckedChange={(checked) => setNewDaily(prev => ({ ...prev, reminders: checked }))}
+                      onCheckedChange={(checked) =>
+                        setNewDaily((prev) => ({ ...prev, reminders: checked }))
+                      }
                     />
                     <label className="text-sm font-medium text-violet-200">
                       Enable reminders
@@ -443,8 +496,8 @@ export default function DailiesPage() {
             {/* Updated Dailies Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredDailies.map((daily) => (
-                <Card 
-                  key={daily.id} 
+                <Card
+                  key={daily.id}
                   className="bg-[#0E0529]/80 border-violet-500/30 overflow-hidden hover:border-violet-500/50 transition-all duration-300 shadow-lg shadow-violet-500/10"
                 >
                   <div className="p-6">
@@ -466,7 +519,7 @@ export default function DailiesPage() {
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <Badge 
+                        <Badge
                           variant="secondary"
                           className="bg-violet-500/20 text-violet-200 border-violet-500/30 text-sm font-medium"
                         >
@@ -481,24 +534,29 @@ export default function DailiesPage() {
                     </div>
 
                     <Button
-                      onClick={() => toggleDaily(daily.id)}
+                      onClick={() => toggleDaily(daily.id, daily.category)}
                       className={cn(
                         "w-full flex items-center justify-center gap-3 py-3 rounded-lg transition-all duration-300",
                         "bg-violet-950/40 border border-violet-500/20",
                         "hover:bg-violet-500/10 hover:border-violet-500/30",
-                        daily.completed && "bg-violet-500/10 border-violet-500/30"
+                        daily.completed &&
+                          "bg-violet-500/10 border-violet-500/30"
                       )}
                     >
-                      <CheckCircle2 
+                      <CheckCircle2
                         className={cn(
                           "h-5 w-5",
-                          daily.completed ? "text-violet-400 fill-violet-400" : "text-violet-400/50"
+                          daily.completed
+                            ? "text-violet-400 fill-violet-400"
+                            : "text-violet-400/50"
                         )}
                       />
-                      <span className={cn(
-                        "text-violet-100",
-                        daily.completed && "line-through text-violet-300/70"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-violet-100",
+                          daily.completed && "line-through text-violet-300/70"
+                        )}
+                      >
                         Complete
                       </span>
                     </Button>
@@ -511,7 +569,9 @@ export default function DailiesPage() {
             {filteredDailies.length === 0 && !showForm && (
               <div className="text-center py-12">
                 <Zap className="h-12 w-12 text-violet-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-violet-100 mb-2">No Daily Tasks Yet</h3>
+                <h3 className="text-xl font-semibold text-violet-100 mb-2">
+                  No Daily Tasks Yet
+                </h3>
                 <p className="text-violet-300/80 mb-6">
                   Create your first daily task to build positive habits
                 </p>
@@ -528,5 +588,5 @@ export default function DailiesPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
