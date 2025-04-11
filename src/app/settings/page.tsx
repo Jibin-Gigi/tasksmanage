@@ -30,7 +30,7 @@ export default function SettingsPage() {
             Settings
           </h1>
           <p className="text-violet-300/80 md:text-lg">
-            Customize your TaskQuest experience and level up your productivity.
+            Reset your password and secure your account.
           </p>
         </div>
 
@@ -42,35 +42,15 @@ export default function SettingsPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#1C133240,transparent_120%)]"></div>
 
           <div className="relative z-10">
-            <Tabs defaultValue="appearance" className="w-full">
-              <TabsList className="grid grid-cols-3 w-full max-w-md bg-violet-900/20 border border-violet-500/20">
-                {/* <TabsTrigger
-                  value="appearance"
-                  className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300"
-                >
-                  Appearance
-                </TabsTrigger>
-                <TabsTrigger
-                  value="navigation"
-                  className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300"
-                >
-                  Navigation
-                </TabsTrigger> */}
+            <Tabs defaultValue="security" className="w-full">
+              <TabsList className="inline-flex w-auto min-w-[120px] bg-violet-900/20 border border-violet-500/20">
                 <TabsTrigger
                   value="security"
-                  className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300"
+                  className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300 w-full"
                 >
                   Security
                 </TabsTrigger>
               </TabsList>
-              {/* 
-              <TabsContent value="appearance" className="space-y-4 mt-8">
-                <AppearanceSettings />
-              </TabsContent>
-
-              <TabsContent value="navigation" className="space-y-4 mt-8">
-                <NavigationSettings />
-              </TabsContent> */}
 
               <TabsContent value="security" className="space-y-4 mt-8">
                 <SecuritySettings />

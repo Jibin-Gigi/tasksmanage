@@ -1,200 +1,174 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import SettingsLayout from "./settings-layout"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Shield, ShieldAlert, ShieldCheck } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Progress } from "@/components/ui/progress"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Shield, Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 
 export default function SecuritySettings() {
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const router = useRouter();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    number: false,
+    special: false,
+    capital: false,
+  });
 
-  // Password strength calculation
-  const calculatePasswordStrength = (password: string) => {
-    if (!password) return 0
+  const checkPasswordStrength = (password: string) => {
+    setPasswordStrength({
+      length: password.length >= 8,
+      number: /\d/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      capital: /[A-Z]/.test(password),
+    });
+  };
 
-    let strength = 0
-    // Length check
-    if (password.length >= 8) strength += 25
-    // Contains lowercase
-    if (/[a-z]/.test(password)) strength += 25
-    // Contains uppercase
-    if (/[A-Z]/.test(password)) strength += 25
-    // Contains number or special char
-    if (/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) strength += 25
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
 
-    return strength
-  }
+    if (newPassword !== confirmPassword) {
+      setError("New passwords don't match");
+      return;
+    }
 
-  const passwordStrength = calculatePasswordStrength(newPassword)
+    const { length, number, special, capital } = passwordStrength;
+    if (!(length && number && special && capital)) {
+      setError("Password doesn't meet strength requirements");
+      return;
+    }
 
-  const getPasswordStrengthText = () => {
-    if (passwordStrength <= 25) return "Weak"
-    if (passwordStrength <= 50) return "Fair"
-    if (passwordStrength <= 75) return "Good"
-    return "Strong"
-  }
+    try {
+      setLoading(true);
 
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 25) return "bg-red-500"
-    if (passwordStrength <= 50) return "bg-amber-500"
-    if (passwordStrength <= 75) return "bg-blue-500"
-    return "bg-green-500"
-  }
+      // First verify current password
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) throw new Error("No user email found");
 
-  const passwordsMatch = newPassword === confirmPassword
-  const canSubmit = currentPassword && newPassword && confirmPassword && passwordsMatch && passwordStrength > 50
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        setError("Current password is incorrect");
+        return;
+      }
+
+      // Update to new password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) throw updateError;
+
+      // Clear form and show success
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      alert("Password updated successfully!");
+      
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to update password");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <SettingsLayout title="Security" description="Manage your account security settings">
-      <div className="space-y-8">
-        {/* Change Password Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-violet-400" />
-            <h3 className="text-lg font-medium text-violet-100">Change Password</h3>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <div className="relative">
-                <Input
-                  id="current-password"
-                  type={showPassword ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter your current password"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
-              <div className="relative">
-                <Input
-                  id="new-password"
-                  type={showPassword ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter your new password"
-                  className="bg-violet-900/20 border-violet-500/20 text-violet-100 placeholder:text-violet-400/50"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="button"
-                  className="absolute right-0 top-0 h-full px-3"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
-                </Button>
-              </div>
-
-              {newPassword && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Password strength:</span>
-                    <span className="font-medium">{getPasswordStrengthText()}</span>
-                  </div>
-                  <Progress value={passwordStrength} className={getPasswordStrengthColor()} />
-                  <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li className="flex items-center gap-1">
-                      {newPassword.length >= 8 ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-3 w-3 text-muted-foreground" />
-                      )}
-                      At least 8 characters
-                    </li>
-                    <li className="flex items-center gap-1">
-                      {/[a-z]/.test(newPassword) ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-3 w-3 text-muted-foreground" />
-                      )}
-                      Lowercase letters (a-z)
-                    </li>
-                    <li className="flex items-center gap-1">
-                      {/[A-Z]/.test(newPassword) ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-3 w-3 text-muted-foreground" />
-                      )}
-                      Uppercase letters (A-Z)
-                    </li>
-                    <li className="flex items-center gap-1">
-                      {/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword) ? (
-                        <CheckCircle2 className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-3 w-3 text-muted-foreground" />
-                      )}
-                      Numbers or special characters
-                    </li>
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirm-password"
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your new password"
-                  className={confirmPassword && !passwordsMatch ? "border-red-500" : ""}
-                />
-              </div>
-              {confirmPassword && !passwordsMatch && <p className="text-sm text-red-500">Passwords do not match</p>}
-            </div>
-          </div>
+    <div className="max-w-md mx-auto">
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Shield className="h-6 w-6 text-violet-400" />
+          <h2 className="text-2xl font-bold text-violet-100">Password Settings</h2>
         </div>
 
-        {/* Two-Factor Section */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-violet-900/20 border border-violet-500/20">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-violet-400" />
-              <Label htmlFor="two-factor" className="text-violet-100">Two-Factor Authentication</Label>
-            </div>
-            <p className="text-sm text-violet-300/80">Add an extra layer of security to your account</p>
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded p-4 text-red-200">
+            {error}
           </div>
-          <Switch id="two-factor" checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
-        </div>
-
-        {/* Alert styling */}
-        {twoFactorEnabled && (
-          <Alert className="bg-violet-900/20 border-violet-500/20">
-            <ShieldAlert className="h-4 w-4 text-violet-400" />
-            <AlertTitle className="text-violet-100">Two-Factor Authentication is enabled</AlertTitle>
-            <AlertDescription className="text-violet-300/80">
-              You'll be asked for an authentication code when signing in on new devices.
-            </AlertDescription>
-          </Alert>
         )}
 
-        {/* Update button */}
-        <div className="flex justify-end">
-          <Button 
-            disabled={!canSubmit}
-            className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 transition-all duration-500 transform hover:scale-105 shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:shadow-[0_0_25px_rgba(124,58,237,0.7)]"
+        <form onSubmit={handlePasswordChange} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-violet-200 mb-2">
+              Current Password
+            </label>
+            <Input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="bg-violet-950/50 border-violet-500/30 text-violet-100"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-violet-200 mb-2">
+              New Password
+            </label>
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                if (!hasStartedTyping && e.target.value) setHasStartedTyping(true);
+                checkPasswordStrength(e.target.value);
+              }}
+              className="bg-violet-950/50 border-violet-500/30 text-violet-100"
+              required
+            />
+            {hasStartedTyping && newPassword && (
+              <div className="mt-2 space-y-2">
+                {Object.entries(passwordStrength).map(([key, valid]) => (
+                  <div key={key} className="flex items-center gap-2 text-sm">
+                    {valid ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <X className="h-4 w-4 text-red-500" />
+                    )}
+                    <span className={valid ? "text-green-500" : "text-red-500"}>
+                      {key === "length" && "At least 8 characters"}
+                      {key === "number" && "Contains a number"}
+                      {key === "special" && "Contains a special character"}
+                      {key === "capital" && "Contains a capital letter"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-violet-200 mb-2">
+              Confirm New Password
+            </label>
+            <Input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="bg-violet-950/50 border-violet-500/30 text-violet-100"
+              required
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white"
           >
-            Update Password
+            {loading ? "Updating Password..." : "Update Password"}
           </Button>
-        </div>
+        </form>
       </div>
-    </SettingsLayout>
-  )
+    </div>
+  );
 }
