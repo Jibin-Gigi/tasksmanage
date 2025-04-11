@@ -44,7 +44,7 @@ export default function SettingsPage() {
           <div className="relative z-10">
             <Tabs defaultValue="appearance" className="w-full">
               <TabsList className="grid grid-cols-3 w-full max-w-md bg-violet-900/20 border border-violet-500/20">
-                <TabsTrigger
+                {/* <TabsTrigger
                   value="appearance"
                   className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300"
                 >
@@ -55,7 +55,7 @@ export default function SettingsPage() {
                   className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300"
                 >
                   Navigation
-                </TabsTrigger>
+                </TabsTrigger> */}
                 <TabsTrigger
                   value="security"
                   className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-violet-300"
@@ -63,14 +63,14 @@ export default function SettingsPage() {
                   Security
                 </TabsTrigger>
               </TabsList>
-
+              {/* 
               <TabsContent value="appearance" className="space-y-4 mt-8">
                 <AppearanceSettings />
               </TabsContent>
 
               <TabsContent value="navigation" className="space-y-4 mt-8">
                 <NavigationSettings />
-              </TabsContent>
+              </TabsContent> */}
 
               <TabsContent value="security" className="space-y-4 mt-8">
                 <SecuritySettings />
