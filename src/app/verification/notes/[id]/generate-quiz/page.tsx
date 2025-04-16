@@ -1,31 +1,48 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { BrainCircuit, Settings, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { BrainCircuit, Settings, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+//import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+//import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch";
+//import { useToast } from "@/hooks/use-toast"
 
-export default function GenerateQuizPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showAdvanced, setShowAdvanced] = useState(false)
+export default function GenerateQuizPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const router = useRouter();
+  //const { toast } = useToast()
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Quiz generation settings
-  const [quizTitle, setQuizTitle] = useState("")
-  const [quizType, setQuizType] = useState("multiple-choice")
-  const [questionCount, setQuestionCount] = useState(10)
-  const [difficulty, setDifficulty] = useState("medium")
-  const [includeExplanations, setIncludeExplanations] = useState(true)
+  const [quizTitle, setQuizTitle] = useState("");
+  const [quizType, setQuizType] = useState("multiple-choice");
+  const [questionCount, setQuestionCount] = useState(10);
+  const [difficulty, setDifficulty] = useState("medium");
+  const [includeExplanations, setIncludeExplanations] = useState(true);
 
   // Mock note data
   const note = {
@@ -37,52 +54,62 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
     date: "2025-03-15",
     tags: ["biology", "science", "cells"],
     wordCount: 1250,
-  }
+  };
 
   const handleGenerateQuiz = async () => {
     if (!quizTitle) {
-      toast({
-        title: "Title Required",
-        description: "Please provide a title for your quiz.",
-        variant: "destructive",
-      })
-      return
+      // toast({
+      //   title: "Title Required",
+      //   description: "Please provide a title for your quiz.",
+      //   variant: "destructive",
+      // })
+      return;
     }
 
-    setIsGenerating(true)
+    setIsGenerating(true);
 
     // Simulate quiz generation process
     setTimeout(() => {
-      toast({
-        title: "Quiz Generated",
-        description: "Your quiz has been generated successfully.",
-      })
-      setIsGenerating(false)
-      router.push(`/quizzes/${Date.now()}`)
-    }, 3000)
-  }
+      // toast({
+      //   title: "Quiz Generated",
+      //   description: "Your quiz has been generated successfully.",
+      // })
+      setIsGenerating(false);
+      router.push(`/quizzes/${Date.now()}`);
+    }, 3000);
+  };
 
   return (
     <div className="container py-12">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Generate Quiz</h1>
-        <p className="text-muted-foreground mb-6">Create a quiz based on your uploaded notes</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">
+          Generate Quiz
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          Create a quiz based on your uploaded notes
+        </p>
 
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Source Material</CardTitle>
-            <CardDescription>The quiz will be generated based on this content</CardDescription>
+            <CardDescription>
+              The quiz will be generated based on this content
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold">{note.title}</h3>
-                <p className="text-sm text-muted-foreground">{note.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {note.description}
+                </p>
               </div>
               <div className="rounded-md bg-muted p-4 text-sm">
                 <p className="line-clamp-4">{note.content}</p>
               </div>
-              <div className="text-sm text-muted-foreground">Word count: {note.wordCount} words</div>
+              <div className="text-sm text-muted-foreground">
+                Word count: {note.wordCount} words
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -90,7 +117,9 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
         <Card>
           <CardHeader>
             <CardTitle>Quiz Settings</CardTitle>
-            <CardDescription>Customize your quiz generation options</CardDescription>
+            <CardDescription>
+              Customize your quiz generation options
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
@@ -111,9 +140,13 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
                     <SelectValue placeholder="Select quiz type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                    <SelectItem value="multiple-choice">
+                      Multiple Choice
+                    </SelectItem>
                     <SelectItem value="true-false">True/False</SelectItem>
-                    <SelectItem value="fill-in-blank">Fill in the Blank</SelectItem>
+                    <SelectItem value="fill-in-blank">
+                      Fill in the Blank
+                    </SelectItem>
                     <SelectItem value="short-answer">Short Answer</SelectItem>
                     <SelectItem value="mixed">Mixed Question Types</SelectItem>
                   </SelectContent>
@@ -123,16 +156,18 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label htmlFor="question-count">Number of Questions</Label>
-                  <span className="text-sm text-muted-foreground">{questionCount}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {questionCount}
+                  </span>
                 </div>
-                <Slider
+                {/* <Slider
                   id="question-count"
                   min={5}
                   max={30}
                   step={1}
                   value={[questionCount]}
                   onValueChange={(value) => setQuestionCount(value[0])}
-                />
+                /> */}
               </div>
 
               <div className="space-y-2">
@@ -152,12 +187,18 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="explanations">Include Explanations</Label>
-                  <p className="text-sm text-muted-foreground">Add explanations for correct answers</p>
+                  <p className="text-sm text-muted-foreground">
+                    Add explanations for correct answers
+                  </p>
                 </div>
-                <Switch id="explanations" checked={includeExplanations} onCheckedChange={setIncludeExplanations} />
+                <Switch
+                  id="explanations"
+                  checked={includeExplanations}
+                  onCheckedChange={setIncludeExplanations}
+                />
               </div>
 
-              <Accordion type="single" collapsible>
+              {/* <Accordion type="single" collapsible>
                 <AccordionItem value="advanced-settings">
                   <AccordionTrigger>
                     <div className="flex items-center">
@@ -195,11 +236,14 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
                     </div>
                   </AccordionContent>
                 </AccordionItem>
-              </Accordion>
+              </Accordion> */}
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={() => router.push(`/notes/${params.id}`)}>
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/notes/${params.id}`)}
+            >
               Cancel
             </Button>
             <Button onClick={handleGenerateQuiz} disabled={isGenerating}>
@@ -219,6 +263,5 @@ export default function GenerateQuizPage({ params }: { params: { id: string } })
         </Card>
       </div>
     </div>
-  )
+  );
 }
-
