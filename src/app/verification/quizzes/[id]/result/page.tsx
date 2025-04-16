@@ -1,14 +1,33 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { CheckCircle, XCircle, Clock, ArrowLeft, Download, Share2, RotateCcw } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  ArrowLeft,
+  Download,
+  Share2,
+  RotateCcw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+//import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
-export default function QuizResultsPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
+export default function QuizResultsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const router = useRouter();
 
   // Mock quiz result data
   const quizResult = {
@@ -98,18 +117,25 @@ export default function QuizResultsPage({ params }: { params: { id: string } }) 
           "Lysosomes contain digestive enzymes that break down waste materials and cellular debris. They are often referred to as the cell's 'recycling center'.",
       },
     ],
-  }
+  };
 
   return (
     <div className="container py-12">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center mb-8">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/quizzes")} className="mr-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/quizzes")}
+            className="mr-4"
+          >
             <ArrowLeft className="h-5 w-5" />
             <span className="sr-only">Back to quizzes</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{quizResult.title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {quizResult.title}
+            </h1>
             <p className="text-muted-foreground">{quizResult.description}</p>
           </div>
         </div>
@@ -117,14 +143,20 @@ export default function QuizResultsPage({ params }: { params: { id: string } }) 
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Quiz Results</CardTitle>
-            <CardDescription>Completed on {new Date(quizResult.completedDate).toLocaleDateString()}</CardDescription>
+            <CardDescription>
+              Completed on{" "}
+              {new Date(quizResult.completedDate).toLocaleDateString()}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               <div className="text-center">
-                <div className="text-5xl font-bold mb-2">{quizResult.score}%</div>
+                <div className="text-5xl font-bold mb-2">
+                  {quizResult.score}%
+                </div>
                 <p className="text-muted-foreground">
-                  You answered {quizResult.correctAnswers} out of {quizResult.totalQuestions} questions correctly
+                  You answered {quizResult.correctAnswers} out of{" "}
+                  {quizResult.totalQuestions} questions correctly
                 </p>
               </div>
 
@@ -132,21 +164,27 @@ export default function QuizResultsPage({ params }: { params: { id: string } }) 
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold">{quizResult.correctAnswers}</div>
+                    <div className="text-2xl font-bold">
+                      {quizResult.correctAnswers}
+                    </div>
                     <p className="text-sm text-muted-foreground">Correct</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold">{quizResult.incorrectAnswers}</div>
+                    <div className="text-2xl font-bold">
+                      {quizResult.incorrectAnswers}
+                    </div>
                     <p className="text-sm text-muted-foreground">Incorrect</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <Clock className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                    <div className="text-2xl font-bold">{quizResult.timeTaken}</div>
+                    <div className="text-2xl font-bold">
+                      {quizResult.timeTaken}
+                    </div>
                     <p className="text-sm text-muted-foreground">Time Taken</p>
                   </CardContent>
                 </Card>
@@ -174,7 +212,7 @@ export default function QuizResultsPage({ params }: { params: { id: string } }) 
         </Card>
 
         <h2 className="text-2xl font-bold mb-4">Question Review</h2>
-        <Accordion type="single" collapsible className="space-y-4">
+        {/* <Accordion type="single" collapsible className="space-y-4">
           {quizResult.questions.map((question, index) => (
             <AccordionItem key={question.id} value={`question-${question.id}`} className="border rounded-lg">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
@@ -229,9 +267,8 @@ export default function QuizResultsPage({ params }: { params: { id: string } }) 
               </AccordionContent>
             </AccordionItem>
           ))}
-        </Accordion>
+        </Accordion> */}
       </div>
     </div>
-  )
+  );
 }
-

@@ -1,93 +1,93 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Upload, FileText, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Upload, FileText, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+//import { useToast } from "@/hooks/use-toast"
 
 export default function UploadNotesPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [tags, setTags] = useState("")
-  const [files, setFiles] = useState<File[]>([])
-  const [isDragging, setIsDragging] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
+  const router = useRouter();
+  //const { toast } = useToast()
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    setIsDragging(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const newFiles = Array.from(e.dataTransfer.files)
-      setFiles([...files, ...newFiles])
+      const newFiles = Array.from(e.dataTransfer.files);
+      setFiles([...files, ...newFiles]);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files)
-      setFiles([...files, ...newFiles])
+      const newFiles = Array.from(e.target.files);
+      setFiles([...files, ...newFiles]);
     }
-  }
+  };
 
   const removeFile = (index: number) => {
-    const newFiles = [...files]
-    newFiles.splice(index, 1)
-    setFiles(newFiles)
-  }
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!title) {
-      toast({
-        title: "Title Required",
-        description: "Please provide a title for your notes.",
-        variant: "destructive",
-      })
-      return
+      // toast({
+      //   title: "Title Required",
+      //   description: "Please provide a title for your notes.",
+      //   variant: "destructive",
+      // })
+      return;
     }
 
     if (files.length === 0) {
-      toast({
-        title: "No Files",
-        description: "Please upload at least one file.",
-        variant: "destructive",
-      })
-      return
+      // toast({
+      //   title: "No Files",
+      //   description: "Please upload at least one file.",
+      //   variant: "destructive",
+      // })
+      return;
     }
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     // Simulate upload process
     setTimeout(() => {
-      toast({
-        title: "Upload Successful",
-        description: "Your notes have been uploaded successfully.",
-      })
-      setIsUploading(false)
-      router.push("/notes")
-    }, 2000)
-  }
+      // toast({
+      //   title: "Upload Successful",
+      //   description: "Your notes have been uploaded successfully.",
+      // })
+      setIsUploading(false);
+      router.push("/notes");
+    }, 2000);
+  };
 
   return (
     <div className="container py-12">
@@ -131,7 +131,9 @@ export default function UploadNotesPage() {
               <Label>Upload Files</Label>
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center ${
-                  isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25"
+                  isDragging
+                    ? "border-primary bg-primary/5"
+                    : "border-muted-foreground/25"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -147,7 +149,9 @@ export default function UploadNotesPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => document.getElementById("file-upload")?.click()}
+                      onClick={() =>
+                        document.getElementById("file-upload")?.click()
+                      }
                     >
                       Browse Files
                     </Button>
@@ -176,10 +180,17 @@ export default function UploadNotesPage() {
                             <FileText className="h-5 w-5 text-muted-foreground" />
                             <div>
                               <p className="font-medium">{file.name}</p>
-                              <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
+                              <p className="text-xs text-muted-foreground">
+                                {(file.size / 1024).toFixed(2)} KB
+                              </p>
                             </div>
                           </div>
-                          <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(index)}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeFile(index)}
+                          >
                             <X className="h-4 w-4" />
                             <span className="sr-only">Remove file</span>
                           </Button>
@@ -192,7 +203,11 @@ export default function UploadNotesPage() {
             )}
 
             <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline" onClick={() => router.push("/notes")}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/notes")}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isUploading}>
@@ -229,6 +244,5 @@ export default function UploadNotesPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }
-

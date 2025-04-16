@@ -1,11 +1,25 @@
-import Link from "next/link"
-import { CheckCircle, Clock, Filter, Search, MoreVertical, BrainCircuit } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Link from "next/link";
+import {
+  CheckCircle,
+  Clock,
+  Filter,
+  Search,
+  MoreVertical,
+  BrainCircuit,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+//import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function TasksPage() {
   // Mock data for tasks
@@ -70,7 +84,7 @@ export default function TasksPage() {
       tags: ["physics", "motion", "forces"],
       status: "available",
     },
-  ]
+  ];
 
   // Mock data for completed tasks
   const completedTasks = [
@@ -96,27 +110,29 @@ export default function TasksPage() {
       tags: ["geography", "capitals", "countries"],
       status: "completed",
     },
-  ]
+  ];
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case "easy":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
       case "medium":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
       case "hard":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
     }
-  }
+  };
 
   return (
     <div className="container py-12">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-          <p className="text-muted-foreground mt-1">Browse available tasks and generate quizzes</p>
+          <p className="text-muted-foreground mt-1">
+            Browse available tasks and generate quizzes
+          </p>
         </div>
       </div>
 
@@ -141,8 +157,10 @@ export default function TasksPage() {
               <Card key={task.id}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-bold">{task.title}</CardTitle>
-                    <DropdownMenu>
+                    <CardTitle className="text-lg font-bold">
+                      {task.title}
+                    </CardTitle>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="-mr-2">
                           <MoreVertical className="h-4 w-4" />
@@ -161,16 +179,22 @@ export default function TasksPage() {
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </div>
                   <CardDescription>{task.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline" className={getDifficultyColor(task.difficulty)}>
+                    <Badge
+                      variant="outline"
+                      className={getDifficultyColor(task.difficulty)}
+                    >
                       {task.difficulty}
                     </Badge>
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                    >
                       {task.category}
                     </Badge>
                   </div>
@@ -203,7 +227,9 @@ export default function TasksPage() {
               <Card key={task.id}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-bold">{task.title}</CardTitle>
+                    <CardTitle className="text-lg font-bold">
+                      {task.title}
+                    </CardTitle>
                     <Badge
                       variant="outline"
                       className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
@@ -215,16 +241,25 @@ export default function TasksPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline" className={getDifficultyColor(task.difficulty)}>
+                    <Badge
+                      variant="outline"
+                      className={getDifficultyColor(task.difficulty)}
+                    >
                       {task.difficulty}
                     </Badge>
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                    >
                       {task.category}
                     </Badge>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground mb-2">
                     <CheckCircle className="mr-1 h-4 w-4 text-green-500" />
-                    <span>Completed on {new Date(task.completedDate).toLocaleDateString()}</span>
+                    <span>
+                      Completed on{" "}
+                      {new Date(task.completedDate).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {task.tags.map((tag) => (
@@ -245,6 +280,5 @@ export default function TasksPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-

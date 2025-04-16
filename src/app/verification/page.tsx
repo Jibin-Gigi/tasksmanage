@@ -1,6 +1,12 @@
-import Link from "next/link"
-import { ArrowRight, BookOpen, FileText, CheckSquare, BrainCircuit } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import {
+  ArrowRight,
+  BookOpen,
+  FileText,
+  CheckSquare,
+  BrainCircuit,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -14,7 +20,8 @@ export default function Home() {
                 Transform Your Notes into Knowledge
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
-                Upload your notes, generate quizzes, and verify your understanding. The smart way to study and learn.
+                Upload your notes, generate quizzes, and verify your
+                understanding. The smart way to study and learn.
               </p>
             </div>
             <div className="space-x-4">
@@ -34,9 +41,12 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">How It Works</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+                How It Works
+              </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-                Our platform makes it easy to test your knowledge and verify your understanding
+                Our platform makes it easy to test your knowledge and verify
+                your understanding
               </p>
             </div>
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3 lg:gap-12">
@@ -44,7 +54,8 @@ export default function Home() {
                 <FileText className="h-12 w-12 text-primary" />
                 <h3 className="text-xl font-bold">Upload Notes</h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  Upload your study notes, documents, or text files to our platform
+                  Upload your study notes, documents, or text files to our
+                  platform
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2">
@@ -58,7 +69,8 @@ export default function Home() {
                 <CheckSquare className="h-12 w-12 text-primary" />
                 <h3 className="text-xl font-bold">Verify Knowledge</h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  Take quizzes, track your progress, and identify areas for improvement
+                  Take quizzes, track your progress, and identify areas for
+                  improvement
                 </p>
               </div>
             </div>
@@ -76,9 +88,12 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Perfect For</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                Perfect For
+              </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-                QuizGenius helps a variety of users test and improve their knowledge
+                QuizGenius helps a variety of users test and improve their
+                knowledge
               </p>
             </div>
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -86,21 +101,24 @@ export default function Home() {
                 <BookOpen className="h-12 w-12 text-primary mb-4" />
                 <h3 className="text-xl font-bold">Students</h3>
                 <p className="mt-2 text-gray-500 dark:text-gray-400">
-                  Create quizzes from lecture notes, textbooks, and study materials to prepare for exams
+                  Create quizzes from lecture notes, textbooks, and study
+                  materials to prepare for exams
                 </p>
               </div>
               <div className="flex flex-col items-start rounded-lg border p-6">
                 <FileText className="h-12 w-12 text-primary mb-4" />
                 <h3 className="text-xl font-bold">Professionals</h3>
                 <p className="mt-2 text-gray-500 dark:text-gray-400">
-                  Test your understanding of work documents, training materials, and industry knowledge
+                  Test your understanding of work documents, training materials,
+                  and industry knowledge
                 </p>
               </div>
               <div className="flex flex-col items-start rounded-lg border p-6">
                 <CheckSquare className="h-12 w-12 text-primary mb-4" />
                 <h3 className="text-xl font-bold">Teachers</h3>
                 <p className="mt-2 text-gray-500 dark:text-gray-400">
-                  Generate quizzes from lesson plans and course materials to assess student understanding
+                  Generate quizzes from lesson plans and course materials to
+                  assess student understanding
                 </p>
               </div>
             </div>
@@ -117,7 +135,8 @@ export default function Home() {
                 Ready to Test Your Knowledge?
               </h2>
               <p className="mx-auto max-w-[700px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Join thousands of users who have improved their learning with QuizGenius
+                Join thousands of users who have improved their learning with
+                QuizGenius
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -136,6 +155,5 @@ export default function Home() {
         </div>
       </section>
     </div>
-  )
+  );
 }
-

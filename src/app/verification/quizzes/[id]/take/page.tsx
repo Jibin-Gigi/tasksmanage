@@ -1,32 +1,48 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, Clock, Flag, HelpCircle, CheckCircle, XCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Flag,
+  HelpCircle,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogFooter,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog"
+// import { useToast } from "@/hooks/use-toast"
 
 export default function TakeQuizPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({})
-  const [showExplanation, setShowExplanation] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const router = useRouter();
+  //const { toast } = useToast()
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    Record<number, string>
+  >({});
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false);
 
   // Mock quiz data
   const quiz = {
@@ -100,62 +116,67 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
           "Lysosomes contain digestive enzymes that break down waste materials and cellular debris. They are often referred to as the cell's 'recycling center'.",
       },
     ],
-  }
+  };
 
-  const totalQuestions = quiz.questions.length
-  const progress = ((currentQuestion + 1) / totalQuestions) * 100
+  const totalQuestions = quiz.questions.length;
+  const progress = ((currentQuestion + 1) / totalQuestions) * 100;
 
   const handleSelectAnswer = (answerId: string) => {
     setSelectedAnswers({
       ...selectedAnswers,
       [currentQuestion]: answerId,
-    })
-  }
+    });
+  };
 
   const handleNextQuestion = () => {
     if (currentQuestion < totalQuestions - 1) {
-      setCurrentQuestion(currentQuestion + 1)
-      setShowExplanation(false)
+      setCurrentQuestion(currentQuestion + 1);
+      setShowExplanation(false);
     }
-  }
+  };
 
   const handlePreviousQuestion = () => {
     if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1)
-      setShowExplanation(false)
+      setCurrentQuestion(currentQuestion - 1);
+      setShowExplanation(false);
     }
-  }
+  };
 
   const handleSubmitQuiz = () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     // Simulate submission process
     setTimeout(() => {
-      toast({
-        title: "Quiz Submitted",
-        description: "Your quiz has been submitted successfully.",
-      })
-      setIsSubmitting(false)
-      router.push(`/quizzes/${params.id}/results`)
-    }, 2000)
-  }
+      // toast({
+      //   title: "Quiz Submitted",
+      //   description: "Your quiz has been submitted successfully.",
+      // })
+      setIsSubmitting(false);
+      router.push(`/quizzes/${params.id}/results`);
+    }, 2000);
+  };
 
   const isQuestionAnswered = (questionIndex: number) => {
-    return selectedAnswers[questionIndex] !== undefined
-  }
+    return selectedAnswers[questionIndex] !== undefined;
+  };
 
   const isCurrentAnswerCorrect = () => {
-    const currentQuestionData = quiz.questions[currentQuestion]
-    return selectedAnswers[currentQuestion] === currentQuestionData.correctAnswer
-  }
+    const currentQuestionData = quiz.questions[currentQuestion];
+    return (
+      selectedAnswers[currentQuestion] === currentQuestionData.correctAnswer
+    );
+  };
 
-  const allQuestionsAnswered = Object.keys(selectedAnswers).length === totalQuestions
+  const allQuestionsAnswered =
+    Object.keys(selectedAnswers).length === totalQuestions;
 
   return (
     <div className="container py-12">
       <div className="max-w-3xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">{quiz.title}</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">
+            {quiz.title}
+          </h1>
           <p className="text-muted-foreground">{quiz.description}</p>
         </div>
 
@@ -174,7 +195,9 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">{quiz.questions[currentQuestion].text}</CardTitle>
+            <CardTitle className="text-xl">
+              {quiz.questions[currentQuestion].text}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <RadioGroup
@@ -186,25 +209,36 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
                 <div
                   key={option.id}
                   className={`flex items-center space-x-2 rounded-md border p-3 ${
-                    showExplanation && option.id === quiz.questions[currentQuestion].correctAnswer
+                    showExplanation &&
+                    option.id === quiz.questions[currentQuestion].correctAnswer
                       ? "border-green-500 bg-green-50 dark:bg-green-950"
                       : showExplanation &&
-                          selectedAnswers[currentQuestion] === option.id &&
-                          option.id !== quiz.questions[currentQuestion].correctAnswer
-                        ? "border-red-500 bg-red-50 dark:bg-red-950"
-                        : ""
+                        selectedAnswers[currentQuestion] === option.id &&
+                        option.id !==
+                          quiz.questions[currentQuestion].correctAnswer
+                      ? "border-red-500 bg-red-50 dark:bg-red-950"
+                      : ""
                   }`}
                 >
-                  <RadioGroupItem value={option.id} id={`option-${option.id}`} />
-                  <Label htmlFor={`option-${option.id}`} className="flex-1 cursor-pointer font-normal">
+                  <RadioGroupItem
+                    value={option.id}
+                    id={`option-${option.id}`}
+                  />
+                  <Label
+                    htmlFor={`option-${option.id}`}
+                    className="flex-1 cursor-pointer font-normal"
+                  >
                     {option.text}
                   </Label>
-                  {showExplanation && option.id === quiz.questions[currentQuestion].correctAnswer && (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  )}
+                  {showExplanation &&
+                    option.id ===
+                      quiz.questions[currentQuestion].correctAnswer && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
                   {showExplanation &&
                     selectedAnswers[currentQuestion] === option.id &&
-                    option.id !== quiz.questions[currentQuestion].correctAnswer && (
+                    option.id !==
+                      quiz.questions[currentQuestion].correctAnswer && (
                       <XCircle className="h-5 w-5 text-red-500" />
                     )}
                 </div>
@@ -217,7 +251,9 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
                   <HelpCircle className="h-5 w-5 text-primary mt-0.5" />
                   <div>
                     <h4 className="font-semibold">Explanation</h4>
-                    <p className="text-sm text-muted-foreground">{quiz.questions[currentQuestion].explanation}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {quiz.questions[currentQuestion].explanation}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -225,89 +261,96 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
           </CardContent>
           <CardFooter className="flex justify-between">
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handlePreviousQuestion} disabled={currentQuestion === 0}>
+              <Button
+                variant="outline"
+                onClick={handlePreviousQuestion}
+                disabled={currentQuestion === 0}
+              >
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
               {!showExplanation && isQuestionAnswered(currentQuestion) && (
-                <Button variant="secondary" onClick={() => setShowExplanation(true)}>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowExplanation(true)}
+                >
                   <HelpCircle className="mr-2 h-4 w-4" />
                   Show Explanation
                 </Button>
               )}
             </div>
             <div className="flex gap-2">
-              {currentQuestion < totalQuestions - 1 ? (
+              {/* {currentQuestion < totalQuestions - 1 ? (
                 <Button onClick={handleNextQuestion} disabled={!isQuestionAnswered(currentQuestion)}>
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
-                  <DialogTrigger asChild>
-                    <Button disabled={!isQuestionAnswered(currentQuestion)}>
-                      <Flag className="mr-2 h-4 w-4" />
-                      Finish Quiz
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Submit Quiz</DialogTitle>
-                      <DialogDescription>
-                        {allQuestionsAnswered
-                          ? "You have answered all questions. Are you sure you want to submit your quiz?"
-                          : "You haven't answered all questions yet. Do you still want to submit your quiz?"}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span>Questions answered:</span>
-                        <span className="font-medium">
-                          {Object.keys(selectedAnswers).length} of {totalQuestions}
-                        </span>
-                      </div>
-                      <Progress
-                        value={(Object.keys(selectedAnswers).length / totalQuestions) * 100}
-                        className="h-2 mt-2"
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleSubmitQuiz} disabled={isSubmitting}>
-                        {isSubmitting ? (
-                          <>
-                            <svg
-                              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                            Submitting...
-                          </>
-                        ) : (
-                          <>Submit Quiz</>
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
+                // <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+                //   <DialogTrigger asChild>
+                //     <Button disabled={!isQuestionAnswered(currentQuestion)}>
+                //       <Flag className="mr-2 h-4 w-4" />
+                //       Finish Quiz
+                //     </Button>
+                //   </DialogTrigger>
+                //   <DialogContent>
+                //     <DialogHeader>
+                //       <DialogTitle>Submit Quiz</DialogTitle>
+                //       <DialogDescription>
+                //         {allQuestionsAnswered
+                //           ? "You have answered all questions. Are you sure you want to submit your quiz?"
+                //           : "You haven't answered all questions yet. Do you still want to submit your quiz?"}
+                //       </DialogDescription>
+                //     </DialogHeader>
+                //     <div className="py-4">
+                //       <div className="flex items-center justify-between text-sm">
+                //         <span>Questions answered:</span>
+                //         <span className="font-medium">
+                //           {Object.keys(selectedAnswers).length} of {totalQuestions}
+                //         </span>
+                //       </div>
+                //       <Progress
+                //         value={(Object.keys(selectedAnswers).length / totalQuestions) * 100}
+                //         className="h-2 mt-2"
+                //       />
+                //     </div>
+                //     <DialogFooter>
+                //       <Button variant="outline" onClick={() => setShowSubmitDialog(false)}>
+                //         Cancel
+                //       </Button>
+                //       <Button onClick={handleSubmitQuiz} disabled={isSubmitting}>
+                //         {isSubmitting ? (
+                //           <>
+                //             <svg
+                //               className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                //               xmlns="http://www.w3.org/2000/svg"
+                //               fill="none"
+                //               viewBox="0 0 24 24"
+                //             >
+                //               <circle
+                //                 className="opacity-25"
+                //                 cx="12"
+                //                 cy="12"
+                //                 r="10"
+                //                 stroke="currentColor"
+                //                 strokeWidth="4"
+                //               ></circle>
+                //               <path
+                //                 className="opacity-75"
+                //                 fill="currentColor"
+                //                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                //               ></path>
+                //             </svg>
+                //             Submitting...
+                //           </>
+                //         ) : (
+                //           <>Submit Quiz</>
+                //         )}
+                //       </Button>
+                //     </DialogFooter>
+                //   </DialogContent>
+                // </Dialog>
+              )} */}
             </div>
           </CardFooter>
         </Card>
@@ -316,12 +359,18 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
           {Array.from({ length: totalQuestions }).map((_, index) => (
             <Button
               key={index}
-              variant={currentQuestion === index ? "default" : isQuestionAnswered(index) ? "secondary" : "outline"}
+              variant={
+                currentQuestion === index
+                  ? "default"
+                  : isQuestionAnswered(index)
+                  ? "secondary"
+                  : "outline"
+              }
               size="icon"
               className="h-8 w-8"
               onClick={() => {
-                setCurrentQuestion(index)
-                setShowExplanation(false)
+                setCurrentQuestion(index);
+                setShowExplanation(false);
               }}
             >
               {index + 1}
@@ -330,6 +379,5 @@ export default function TakeQuizPage({ params }: { params: { id: string } }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

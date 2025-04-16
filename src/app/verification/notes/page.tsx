@@ -1,10 +1,24 @@
-import Link from "next/link"
-import { FileText, Plus, Search, Filter, MoreVertical, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import Link from "next/link";
+import {
+  FileText,
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Trash2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+//import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function NotesPage() {
   // Mock data for notes
@@ -57,14 +71,16 @@ export default function NotesPage() {
       tags: ["literature", "shakespeare", "plays"],
       wordCount: 2100,
     },
-  ]
+  ];
 
   return (
     <div className="container py-12">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Notes</h1>
-          <p className="text-muted-foreground mt-1">Manage your uploaded notes and generate quizzes</p>
+          <p className="text-muted-foreground mt-1">
+            Manage your uploaded notes and generate quizzes
+          </p>
         </div>
         <Button asChild className="mt-4 md:mt-0">
           <Link href="/notes/upload">
@@ -88,8 +104,10 @@ export default function NotesPage() {
           <Card key={note.id}>
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-bold">{note.title}</CardTitle>
-                <DropdownMenu>
+                <CardTitle className="text-lg font-bold">
+                  {note.title}
+                </CardTitle>
+                {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="-mr-2">
                       <MoreVertical className="h-4 w-4" />
@@ -116,7 +134,7 @@ export default function NotesPage() {
                       <Trash2 className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
               </div>
               <CardDescription>{note.description}</CardDescription>
             </CardHeader>
@@ -138,13 +156,14 @@ export default function NotesPage() {
                 Uploaded on {new Date(note.date).toLocaleDateString()}
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/notes/${note.id}/generate-quiz`}>Generate Quiz</Link>
+                <Link href={`/notes/${note.id}/generate-quiz`}>
+                  Generate Quiz
+                </Link>
               </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
     </div>
-  )
+  );
 }
-
