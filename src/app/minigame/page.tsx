@@ -1,33 +1,33 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { Gamepad2, Maximize2 } from 'lucide-react'
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Sidebar from '@/components/Sidebar'
-import { useAuth } from '@/contexts/AuthContext'
+import { useState, useEffect, useRef } from "react";
+import { Gamepad2, Maximize2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Sidebar from "@/components/Sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function MinigamePage() {
-  const { user, loading } = useAuth()
-  const [gameUrl, setGameUrl] = useState('https://pixel-game-01.vercel.app/') // Replace with your game URL
-  const containerRef = useRef<HTMLDivElement>(null)
+  const { user, loading } = useAuth();
+  const [gameUrl, setGameUrl] = useState("https://pixel-game-01.vercel.app/"); // Replace with your game URL
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/login'
-      return
+      window.location.href = "/login";
+      return;
     }
-  }, [user, loading])
+  }, [user, loading]);
 
   const handleFullScreen = () => {
-    if (!containerRef.current) return
+    if (!containerRef.current) return;
 
     if (document.fullscreenElement) {
-      document.exitFullscreen()
+      document.exitFullscreen();
     } else {
-      containerRef.current.requestFullscreen()
+      containerRef.current.requestFullscreen();
     }
-  }
+  };
 
   return (
     <div className="flex">
@@ -41,7 +41,9 @@ export default function MinigamePage() {
                 <Gamepad2 className="h-8 w-8 text-violet-400" />
                 Minigame
               </h1>
-              <p className="text-violet-300/80 mt-2">Take a break and have some fun!</p>
+              <p className="text-violet-300/80 mt-2">
+                Take a break and have some fun!
+              </p>
             </div>
 
             {/* Game Container */}
@@ -65,12 +67,18 @@ export default function MinigamePage() {
 
             {/* Game Instructions */}
             <div className="mt-6 text-violet-300/80">
-              <p>Note: Some games might be blocked by the website's security settings. If the game doesn't load, try opening it in a new tab.</p>
-              <p className="mt-2">Press the maximize button in the top-right corner or ESC to toggle fullscreen mode.</p>
+              <p>
+                Note: Some games might be blocked by the website's security
+                settings. If the game doesn't load, try opening it in a new tab.
+              </p>
+              <p className="mt-2">
+                Press the maximize button in the top-right corner or ESC to
+                toggle fullscreen mode.
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
