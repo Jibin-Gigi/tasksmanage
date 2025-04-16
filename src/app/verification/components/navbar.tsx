@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ModeToggle } from "./mode-toggle"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ModeToggle } from "./mode-toggle";
 
 export default function Navbar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const routes = [
     {
@@ -28,7 +28,7 @@ export default function Navbar() {
       href: "/quizzes",
       label: "My Quizzes",
     },
-  ]
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -54,7 +54,7 @@ export default function Navbar() {
                     href={route.href}
                     className={cn(
                       "flex items-center gap-2 rounded-md px-5 py-2 text-sm font-medium",
-                      pathname === route.href ? "bg-accent" : "hover:bg-accent",
+                      pathname === route.href ? "bg-accent" : "hover:bg-accent"
                     )}
                   >
                     {route.label}
@@ -73,7 +73,9 @@ export default function Navbar() {
                 href={route.href}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-primary",
-                  pathname === route.href ? "text-primary" : "text-muted-foreground",
+                  pathname === route.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 )}
               >
                 {route.label}
@@ -82,13 +84,12 @@ export default function Navbar() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
-          <ModeToggle />
+          {/* <ModeToggle /> */}
           <Button asChild className="hidden md:flex">
             <Link href="/dashboard">Dashboard</Link>
           </Button>
         </div>
       </div>
     </header>
-  )
+  );
 }
-

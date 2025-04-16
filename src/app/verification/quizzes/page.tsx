@@ -1,12 +1,27 @@
-import Link from "next/link"
-import { CheckCircle, Clock, Search, Filter, MoreVertical, Play, BarChart } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
+import Link from "next/link";
+import {
+  CheckCircle,
+  Clock,
+  Search,
+  Filter,
+  MoreVertical,
+  Play,
+  BarChart,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+//import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 export default function QuizzesPage() {
   // Mock data for quizzes
@@ -54,21 +69,27 @@ export default function QuizzesPage() {
       score: 92,
       tags: ["psychology", "development", "cognition"],
     },
-  ]
+  ];
 
   return (
     <div className="container py-12">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Quizzes</h1>
-          <p className="text-muted-foreground mt-1">Manage and take your generated quizzes</p>
+          <p className="text-muted-foreground mt-1">
+            Manage and take your generated quizzes
+          </p>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Search quizzes..." className="pl-8" />
+          <Input
+            type="search"
+            placeholder="Search quizzes..."
+            className="pl-8"
+          />
         </div>
         <Button variant="outline" className="flex gap-2">
           <Filter className="h-4 w-4" /> Filter
@@ -88,8 +109,10 @@ export default function QuizzesPage() {
               <Card key={quiz.id}>
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-bold">{quiz.title}</CardTitle>
-                    <DropdownMenu>
+                    <CardTitle className="text-lg font-bold">
+                      {quiz.title}
+                    </CardTitle>
+                    {/* <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="-mr-2">
                           <MoreVertical className="h-4 w-4" />
@@ -117,16 +140,21 @@ export default function QuizzesPage() {
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                   </div>
                   <CardDescription>{quiz.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                    >
                       Source: {quiz.source}
                     </Badge>
-                    <Badge variant="outline">{quiz.questionCount} questions</Badge>
+                    <Badge variant="outline">
+                      {quiz.questionCount} questions
+                    </Badge>
                   </div>
 
                   {quiz.status === "not-started" && (
@@ -198,8 +226,10 @@ export default function QuizzesPage() {
                 <Card key={quiz.id}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-bold">{quiz.title}</CardTitle>
-                      <DropdownMenu>
+                      <CardTitle className="text-lg font-bold">
+                        {quiz.title}
+                      </CardTitle>
+                      {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="-mr-2">
                             <MoreVertical className="h-4 w-4" />
@@ -218,7 +248,7 @@ export default function QuizzesPage() {
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu> */}
                     </div>
                     <CardDescription>{quiz.description}</CardDescription>
                   </CardHeader>
@@ -230,7 +260,9 @@ export default function QuizzesPage() {
                       >
                         Source: {quiz.source}
                       </Badge>
-                      <Badge variant="outline">{quiz.questionCount} questions</Badge>
+                      <Badge variant="outline">
+                        {quiz.questionCount} questions
+                      </Badge>
                     </div>
 
                     <div className="flex items-center text-sm text-muted-foreground mb-2">
@@ -265,8 +297,10 @@ export default function QuizzesPage() {
                 <Card key={quiz.id}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-bold">{quiz.title}</CardTitle>
-                      <DropdownMenu>
+                      <CardTitle className="text-lg font-bold">
+                        {quiz.title}
+                      </CardTitle>
+                      {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="-mr-2">
                             <MoreVertical className="h-4 w-4" />
@@ -285,7 +319,7 @@ export default function QuizzesPage() {
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu> */}
                     </div>
                     <CardDescription>{quiz.description}</CardDescription>
                   </CardHeader>
@@ -297,7 +331,9 @@ export default function QuizzesPage() {
                       >
                         Source: {quiz.source}
                       </Badge>
-                      <Badge variant="outline">{quiz.questionCount} questions</Badge>
+                      <Badge variant="outline">
+                        {quiz.questionCount} questions
+                      </Badge>
                     </div>
 
                     <div className="space-y-2 mb-2">
@@ -335,8 +371,10 @@ export default function QuizzesPage() {
                 <Card key={quiz.id}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-bold">{quiz.title}</CardTitle>
-                      <DropdownMenu>
+                      <CardTitle className="text-lg font-bold">
+                        {quiz.title}
+                      </CardTitle>
+                      {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="-mr-2">
                             <MoreVertical className="h-4 w-4" />
@@ -355,7 +393,7 @@ export default function QuizzesPage() {
                             </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
-                      </DropdownMenu>
+                      </DropdownMenu> */}
                     </div>
                     <CardDescription>{quiz.description}</CardDescription>
                   </CardHeader>
@@ -367,7 +405,9 @@ export default function QuizzesPage() {
                       >
                         Source: {quiz.source}
                       </Badge>
-                      <Badge variant="outline">{quiz.questionCount} questions</Badge>
+                      <Badge variant="outline">
+                        {quiz.questionCount} questions
+                      </Badge>
                     </div>
 
                     <div className="flex items-center text-sm mb-2">
@@ -396,6 +436,5 @@ export default function QuizzesPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-

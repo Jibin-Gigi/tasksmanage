@@ -1,4 +1,4 @@
-import Link from "next/link"
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -10,18 +10,26 @@ export default function Footer() {
           </p>
         </div>
         <div className="flex gap-4">
-          <Link href="/privacy" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+          <Link
+            href="/privacy"
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
             Privacy
           </Link>
-          <Link href="/terms" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+          <Link
+            href="/terms"
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
             Terms
           </Link>
-          <Link href="/contact" className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+          <Link
+            href="/contact"
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
             Contact
           </Link>
         </div>
       </div>
     </footer>
-  )
+  );
 }
-
