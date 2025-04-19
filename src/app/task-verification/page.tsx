@@ -14,7 +14,7 @@ import Sidebar from "@/components/Sidebar";
 
 // Initialize Gemini Pro
 const genAI = new GoogleGenerativeAI(
-  process.env.NEXT_PUBLIC_GOOGLE_API_KEY || ""
+  process.env.NEXT_PUBLIC_GOOGLE_API_KEY || process.env.GOOGLE_AI_KEY || ""
 );
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
@@ -422,7 +422,13 @@ function TaskVerificationContent() {
 
 export default function TaskVerification() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-[#0E0529] text-white">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-[#0E0529] text-white">
+          Loading...
+        </div>
+      }
+    >
       <TaskVerificationContent />
     </Suspense>
   );
