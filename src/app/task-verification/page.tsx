@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,7 +31,7 @@ interface Task {
   category: string;
 }
 
-export default function TaskVerification() {
+function TaskVerificationContent() {
   const searchParams = useSearchParams();
   const taskId = searchParams.get("taskId");
   const category = searchParams.get("category");
@@ -416,5 +417,13 @@ export default function TaskVerification() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TaskVerification() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-[#0E0529] text-white">Loading...</div>}>
+      <TaskVerificationContent />
+    </Suspense>
   );
 }
