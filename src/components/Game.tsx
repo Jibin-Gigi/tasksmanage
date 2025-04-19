@@ -8,8 +8,9 @@ export function Game() {
     const initPhaser = async () => {
       if (typeof window !== "undefined") {
         const Phaser = (await import("phaser")).default;
-        if (!gameRef.current) {
-          gameRef.current = new Phaser.Game(createGameConfig());
+        const container = document.getElementById("game-content");
+        if (!gameRef.current && container) {
+          gameRef.current = new Phaser.Game(createGameConfig(container));
         }
       }
     };
@@ -27,7 +28,7 @@ export function Game() {
   return (
     <div
       id="game-content"
-      className="fixed inset-0 flex items-center justify-center"
+      className="w-full h-full"
     />
   );
 }

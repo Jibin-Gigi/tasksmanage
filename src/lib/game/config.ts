@@ -1,14 +1,17 @@
 import { Types } from "phaser";
 import { MainScene } from "@/lib/game/scenes/MainScene";
 
-export const createGameConfig = (): Types.Core.GameConfig => ({
+export const createGameConfig = (
+  container: HTMLElement
+): Types.Core.GameConfig => ({
   type: Phaser.AUTO,
   parent: "game-content",
   backgroundColor: "#000000",
   scale: {
     mode: Phaser.Scale.RESIZE,
-    width: window.innerWidth,
-    height: window.innerHeight,
+    parent: container,
+    width: "100%",
+    height: "100%",
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   physics: {
