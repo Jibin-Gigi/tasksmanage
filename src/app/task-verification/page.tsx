@@ -106,8 +106,10 @@ function TaskVerificationContent() {
 
         if (questData && !questError) {
           console.log(questData);
-          const selectedTask = questData.selected_tasks[taskId];
-          console.log(selectedTask);
+          const selectedTask = questData.selected_tasks.find(
+            (task: any) => task.id === taskId
+          );
+
           //setSelectedTasks(selectedTask);
 
           if (selectedTask) {
@@ -117,6 +119,9 @@ function TaskVerificationContent() {
               description: selectedTask.description,
               category: "Quest Task",
             };
+
+            console.log("Fetched Task is : ");
+            console.log(taskData);
           }
         }
       }
