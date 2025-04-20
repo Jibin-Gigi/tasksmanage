@@ -303,7 +303,7 @@ export default function TasksPage() {
                                 {!task.completed && (
                                   <button
                                     onClick={() =>
-                                      handleVerifyTask(quest.id, `${index}`)
+                                      handleVerifyTask(quest.id, `${task.id}`)
                                     }
                                     className="mt-1 p-2 rounded-full bg-violet-950/80 text-violet-400 hover:bg-violet-500/20 transition-all duration-300"
                                   >
